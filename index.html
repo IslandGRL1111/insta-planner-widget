@@ -183,26 +183,25 @@
     return await res.json();
   }
 
-  /* ---------- ACCESS UI ---------- */
+ /* ---------- ACCESS UI ---------- */
 function renderUnlock() {
   document.getElementById("app").innerHTML = `
     <div class="center unlock-screen">
-      <input placeholder="Enter access code" id="code" autocomplete="off" />
-      <button class="unlock" onclick="unlock()">Unlock Insta Widget</button>
+      <input
+        placeholder="Enter access code"
+        id="code"
+        autocomplete="off"
+      />
+      <button class="unlock" id="unlockBtn">
+        Unlock Insta Widget
+      </button>
     </div>
   `;
-}
 
-async function unlock() {
-  const token = document.getElementById("code").value;
-  const result = await checkAccess(token);
-
-  if (result.allowed) {
-    localStorage.setItem(ACCESS_KEY, token);
-    loadWidget();
-  } else {
-    alert("Access paused 🌙");
-  }
+  // 🔐 bind click AFTER render (Notion-safe)
+  document
+    .getElementById("unlockBtn")
+    .addEventListener("click", unlock);
 }
 
   /* ---------- MAIN WIDGET ---------- */
