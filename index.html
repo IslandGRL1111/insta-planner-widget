@@ -152,13 +152,15 @@
   }
 
   /* ---------- ACCESS ---------- */
-  function renderUnlock() {
+ function renderUnlock() {
     document.getElementById("app").innerHTML = `
       <div class="center unlock-screen">
         <input id="code" placeholder="Enter access code" autocomplete="off" />
         <button class="unlock" id="unlockBtn">Unlock Insta Widget</button>
       </div>
     `;
+  }
+
 
     document
       .getElementById("unlockBtn")
