@@ -184,6 +184,7 @@
   /* ---------- MAIN ---------- */
   async function loadWidget() {
     const data = await fetchPosts();
+    console.log("NOTION DATA:", data);
 
     const filtered = data
       .filter(p =>
