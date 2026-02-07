@@ -143,128 +143,14 @@
 <div class="app" id="app"></div>
 
 <script>
-/* ---------- CONFIG ---------- */
-const ACCESS_KEY = "insta_widget_access";
-let activeTab = "post"; // post | reel
-
-/* ---------- API ---------- */
-async function checkAccess(token) {
-  const res = await fetch("/api/check-widget-token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token })
-  });
-  return await res.json();
-}
-
-async function fetchPosts() {
-  const res = await fetch("/api/notion");
-  return await res.json();
-}
-
-/* ---------- ACCESS UI ---------- */
-function renderUnlock() {
   document.getElementById("app").innerHTML = `
     <div class="center unlock-screen">
-      <input
-        id="code"
-        placeholder="Enter access code"
-        autocomplete="off"
-      />
-      <button class="unlock" onclick="unlock()">
+      <input placeholder="Enter access code" />
+      <button class="unlock" onclick="alert('CLICK WORKS 🌸')">
         Unlock Insta Widget
       </button>
     </div>
   `;
-}
-
-async function unlock() {
-  const token = document.getElementById("code").value.trim();
-  if (!token) return;
-
-  const result = await checkAccess(token);
-
-  if (result.allowed) {
-    localStorage.setItem(ACCESS_KEY, token);
-    loadWidget();
-  } else {
-    alert("Access paused 🌙");
-  }
-}
-
-/* ---------- MAIN WIDGET ---------- */
-async function loadWidget() {
-  const app = document.getElementById("app");
-  const data = await fetchPosts();
-
-  const filtered = data
-    .filter(p =>
-      p.show === true &&
-      Array.isArray(p.platform) &&
-      p.platform.includes("Instagram") &&
-      (activeTab === "reel"
-        ? Array.isArray(p.type) && p.type.includes("Reel")
-        : true)
-    )
-    .sort((a, b) => (b.pinned === true) - (a.pinned === true))
-    .slice(0, 15);
-
-  let gridHTML = "";
-
-  filtered.forEach(p => {
-    gridHTML += `
-      <div class="cell ${p.pinned ? "pinned" : ""}">
-        ${p.image ? `<img src="${p.image}" />` : ""}
-
-        ${p.pinned ? `
-          <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png"
-               style="position:absolute;bottom:4px;left:4px;width:14px;height:14px;z-index:2;" />
-        ` : ""}
-
-        ${p.is_carousel ? `
-          <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164182/carousel_canva_fgeyqa.png"
-               style="position:absolute;top:4px;right:4px;width:14px;height:14px;" />
-        ` : ""}
-
-        ${Array.isArray(p.type) && p.type.includes("Reel") ? `
-          <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png"
-               style="position:absolute;top:4px;right:4px;width:14px;height:14px;" />
-        ` : ""}
-      </div>
-    `;
-  });
-
-  while (filtered.length < 15) {
-    gridHTML += `<div class="cell"></div>`;
-    filtered.push({});
-  }
-
-  app.innerHTML = `
-    <div class="tabs">
-      <div class="tab ${activeTab === "post" ? "active" : ""}" onclick="switchTab('post')">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
-      </div>
-      <div class="tab ${activeTab === "reel" ? "active" : ""}" onclick="switchTab('reel')">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
-      </div>
-    </div>
-
-    <div class="grid">${gridHTML}</div>
-
-    <div class="footer">
-      <button class="refresh" onclick="loadWidget()">Refresh</button>
-    </div>
-  `;
-}
-
-function switchTab(tab) {
-  activeTab = tab;
-  loadWidget();
-}
-
-/* ---------- BOOT ---------- */
-const saved = localStorage.getItem(ACCESS_KEY);
-saved ? loadWidget() : renderUnlock();
 </script>
 </body>
 </html>
