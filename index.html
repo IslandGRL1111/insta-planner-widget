@@ -153,29 +153,37 @@
   </div>
 
   <script>
-    async function loadPosts() {
-      const res = await fetch("/api/notion");
-      const posts = await res.json();
+  async function fetchNotionPosts() {
+    const res = await fetch("/api/notion");
+    return await res.json();
+  }
 
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
+  async function renderGrid() {
+    const data = await fetchNotionPosts();
+    const grid = document.querySelector(".grid");
 
-      posts.slice(0, 9).forEach(post => {
-        const cell = document.createElement("div");
-        cell.className = "cell";
+    grid.innerHTML = "";
 
-        if (post.image) {
-          const img = document.createElement("img");
-          img.src = post.image;
-          img.alt = "";
-          cell.appendChild(img);
-        }
+    const posts = data.posts || [];
 
-        grid.appendChild(cell);
-      });
-    }
+    posts.slice(0, 15).forEach(post => {
+      const cell = document.createElement("div");
+      cell.className = "cell";
 
-    loadPosts();
-  </script>
+      if (post.image) {
+        const img = document.createElement("img");
+        img.src = post.image;
+        cell.appendChild(img);
+      }
+
+      grid.appendChild(cell);
+    });
+  }
+
+  document.querySelector(".refresh").addEventListener("click", renderGrid);
+
+  // auto-load on page open
+  renderGrid();
+</script>
 </body>
 </html>
