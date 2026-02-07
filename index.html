@@ -145,6 +145,7 @@
 
     <!-- Grid -->
     <div id="grid" class="grid"></div>
+    <div class="grid"></div>
 
     <!-- Footer -->
     <div class="footer">
@@ -184,6 +185,21 @@
 
   // auto-load on page open
   renderGrid();
+</script>
+    <script>
+  function renderPlaceholders() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 15; i++) {
+      const slot = document.createElement("div");
+      slot.className = "grid-item";
+      grid.appendChild(slot);
+    }
+  }
+
+  // Run once on load
+  renderPlaceholders();
 </script>
 </body>
 </html>
