@@ -1,45 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Insta Planner Widget</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script type="text/babel">
+  const mockPosts = [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+      date: "Jan 20",
+      pinned: true,
+      type: "post",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb",
+      date: "Jan 22",
+      pinned: false,
+      type: "reel",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+      date: "Jan 25",
+      pinned: false,
+      type: "post",
+    },
+  ];
 
-    <!-- React -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  function GridItem({ post }) {
+    return (
+      <div
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          cursor: "pointer",
+          aspectRatio: "4 / 5",
+          background: "#eaeaea",
+        }}
+      >
+        <img
+          src={post.image}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
 
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <style>
-      body {
-        margin: 0;
-        background: linear-gradient(135deg, #f4effa, #faf5ff);
-        font-family: system-ui;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-      function App() {
-        return (
-          <div style={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <h1>🌸 Insta Planner Widget UI coming alive 🌸</h1>
+        {post.pinned && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 4,
+              left: 4,
+              fontSize: 12,
+              background: "rgba(0,0,0,0.6)",
+              color: "white",
+              padding: "2px 6px",
+              borderRadius: 6,
+            }}
+          >
+            📌
           </div>
-        );
-      }
+        )}
 
-      const root = ReactDOM.createRoot(document.getElementById("root"));
-      root.render(<App />);
-    </script>
-  </body>
-</html>
+        <div
+          style={{
+            position: "absolute",
+            top: 4,
+            left: 4,
+            fontSize: 11,
+            background: "rgba(0,0,0,0.4)",
+            color: "white",
+            padding: "2px 6px",
+            borderRadius: 6,
+          }}
+        >
+          {post.date}
+        </div>
+      </div>
+    );
+  }
+
+  function App() {
+    return (
+      <div
+        style={{
+          maxWidth: 380,
+          margin: "40px auto",
+          background: "white",
+          borderRadius: 16,
+          padding: 12,
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 6,
+          }}
+        >
+          {mockPosts.map((post) => (
+            <GridItem key={post.id} post={post} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<App />);
+</script>
