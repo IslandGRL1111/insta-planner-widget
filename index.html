@@ -25,6 +25,7 @@
       overflow: hidden;
     }
 
+    /* ---------- TABS ---------- */
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -37,6 +38,7 @@
       font-size: 13px;
       cursor: pointer;
       opacity: 0.5;
+      user-select: none;
     }
 
     .tab.active {
@@ -45,6 +47,7 @@
       font-weight: 600;
     }
 
+    /* ---------- GRID ---------- */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -66,8 +69,9 @@
       object-fit: cover;
     }
 
+    /* ---------- PINNED ---------- */
     .pinned::after {
-      content: "📌";
+      content: "";
       position: absolute;
       bottom: 4px;
       left: 4px;
@@ -84,8 +88,8 @@
       100% { box-shadow: 0 0 0 0 rgba(255,215,160,0); }
     }
 
+    /* ---------- FOOTER ---------- */
     .footer {
-      position: relative;
       padding: 14px;
       text-align: center;
       border-top: 1px solid rgba(0,0,0,0.08);
@@ -101,17 +105,9 @@
       box-shadow: 0 0 12px rgba(213,231,204,0.6);
     }
 
-    .unlock {
-      background: #E6DBFF;
-      border: none;
-      padding: 10px 22px;
-      border-radius: 999px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
+    /* ---------- ACCESS ---------- */
     .center {
-      padding: 24px;
+      padding: 28px;
       text-align: center;
     }
 
@@ -122,6 +118,15 @@
       border: 1px solid #ddd;
       margin-bottom: 12px;
     }
+
+    .unlock {
+      background: #E6DBFF;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -129,10 +134,11 @@
 <div class="app" id="app"></div>
 
 <script>
+  /* ---------- CONFIG ---------- */
   const ACCESS_KEY = "insta_widget_access";
+  let activeTab = "post"; // post | reel
 
-  let activeTab = "post";
-
+  /* ---------- API ---------- */
   async function checkAccess(token) {
     const res = await fetch("/api/check-widget-token", {
       method: "POST",
@@ -147,10 +153,11 @@
     return await res.json();
   }
 
+  /* ---------- ACCESS UI ---------- */
   function renderUnlock() {
     document.getElementById("app").innerHTML = `
       <div class="center">
-        <input placeholder="Enter access code" id="code"/>
+        <input placeholder="Enter access code" id="code" />
         <button class="unlock" onclick="unlock()">Unlock Insta Widget</button>
       </div>
     `;
@@ -159,6 +166,7 @@
   async function unlock() {
     const token = document.getElementById("code").value;
     const result = await checkAccess(token);
+
     if (result.allowed) {
       localStorage.setItem(ACCESS_KEY, token);
       loadWidget();
@@ -167,35 +175,90 @@
     }
   }
 
+  /* ---------- MAIN WIDGET ---------- */
   async function loadWidget() {
     const data = await fetchPosts();
 
     const filtered = data
       .filter(p =>
-        p.show === true &&
-        p.platform.includes("Instagram") &&
-        (activeTab === "reel" ? p.type.includes("Reel") : true)
+        p.show === true &&                       // user explicitly opted in
+        Array.isArray(p.platform) &&
+        p.platform.includes("Instagram") &&     // platform-safe
+        (activeTab === "reel"
+          ? Array.isArray(p.type) && p.type.includes("Reel")
+          : true)
       )
-      .sort((a,b) => (b.pinned === true) - (a.pinned === true))
+      .sort((a, b) => (b.pinned === true) - (a.pinned === true))
       .slice(0, 15);
 
     document.getElementById("app").innerHTML = `
-      <div class="tabs">
-        <div class="tab ${activeTab==="post"?"active":""}" onclick="switchTab('post')">Posts</div>
-        <div class="tab ${activeTab==="reel"?"active":""}" onclick="switchTab('reel')">Reels</div>
+  <div class="tabs">
+    <div class="tab ${activeTab==="post"?"active":""}" onclick="switchTab('post')">
+      <img src="YOUR_GRID_ICON_URL_HERE" alt="Posts" width="22" />
+    </div>
+
+    <div class="tab ${activeTab==="reel"?"active":""}" onclick="switchTab('reel')">
+      <img src="YOUR_REELS_ICON_URL_HERE" alt="Reels" width="22" />
+    </div>
+  </div>
+
+  <div class="grid">
+    ${filtered.map(p => `
+      <div class="cell ${p.pinned ? "pinned" : ""}">
+        
+        ${p.image ? `<img src="${p.image}" />` : ""}
+
+        ${p.pinned ? `
+          <img
+            src="YOUR_PINNED_ICON_URL_HERE"
+            style="
+              position:absolute;
+              bottom:4px;
+              left:4px;
+              width:14px;
+              height:14px;
+              z-index:2;
+            "
+          />
+        ` : ""}
+
+        ${p.is_carousel ? `
+          <img
+            src="YOUR_CAROUSEL_ICON_URL_HERE"
+            style="
+              position:absolute;
+              top:4px;
+              right:4px;
+              width:14px;
+              height:14px;
+            "
+          />
+        ` : ""}
+
+        ${Array.isArray(p.type) && p.type.includes("Reel") ? `
+          <img
+            src="YOUR_REEL_VIDEO_ICON_URL_HERE"
+            style="
+              position:absolute;
+              top:4px;
+              right:4px;
+              width:14px;
+              height:14px;
+            "
+          />
+        ` : ""}
       </div>
-      <div class="grid">
-        ${filtered.map(p => `
-          <div class="cell ${p.pinned ? "pinned":""}">
-            ${p.image ? `<img src="${p.image}"/>` : ""}
-          </div>
-        `).join("")}
-        ${Array.from({length: Math.max(0,15-filtered.length)}).map(()=>`<div class="cell"></div>`).join("")}
-      </div>
-      <div class="footer">
-        <button class="refresh" onclick="loadWidget()">Refresh</button>
-      </div>
-    `;
+    `).join("")}
+
+    ${Array.from({ length: Math.max(0, 15 - filtered.length) })
+      .map(() => `<div class="cell"></div>`)
+      .join("")}
+  </div>
+
+  <div class="footer">
+    <button class="refresh" onclick="loadWidget()">Refresh</button>
+  </div>
+`;
   }
 
   function switchTab(tab) {
@@ -203,8 +266,10 @@
     loadWidget();
   }
 
+  /* ---------- BOOT ---------- */
   const saved = localStorage.getItem(ACCESS_KEY);
-  if (saved) loadWidget(); else renderUnlock();
+  if (saved) loadWidget();
+  else renderUnlock();
 </script>
 </body>
 </html>
