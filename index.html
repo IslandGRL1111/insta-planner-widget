@@ -145,61 +145,27 @@
 
     <!-- Grid -->
     <div id="grid" class="grid"></div>
-    <div class="grid"></div>
 
     <!-- Footer -->
     <div class="footer">
-      <button class="refresh" onclick="loadPosts()">Refresh</button>
+      <button class="refresh" onclick="renderGrid()">Refresh</button>
     </div>
   </div>
 
   <script>
-  async function fetchNotionPosts() {
-    const res = await fetch("/api/notion");
-    return await res.json();
-  }
+    function renderGrid() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
 
-  async function renderGrid() {
-    const data = await fetchNotionPosts();
-    const grid = document.querySelector(".grid");
-
-    grid.innerHTML = "";
-
-    const posts = data.posts || [];
-
-    posts.slice(0, 15).forEach(post => {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-
-      if (post.image) {
-        const img = document.createElement("img");
-        img.src = post.image;
-        cell.appendChild(img);
+      for (let i = 0; i < 15; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        grid.appendChild(cell);
       }
-
-      grid.appendChild(cell);
-    });
-  }
-
-  document.querySelector(".refresh").addEventListener("click", renderGrid);
-
-  // auto-load on page open
-  renderGrid();
-</script>
-    <script>
-  function renderPlaceholders() {
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-
-    for (let i = 0; i < 15; i++) {
-      const slot = document.createElement("div");
-      slot.className = "grid-item";
-      grid.appendChild(slot);
     }
-  }
 
-  // Run once on load
-  renderPlaceholders();
-</script>
+    // auto-render on load
+    renderGrid();
+  </script>
 </body>
 </html>
