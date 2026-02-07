@@ -23,11 +23,9 @@
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       overflow: hidden;
+      position: relative;
     }
 
-    
-
-    /* ---------- TABS ---------- */
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -37,7 +35,6 @@
     .tab {
       padding: 10px;
       text-align: center;
-      font-size: 13px;
       cursor: pointer;
       opacity: 0.5;
       user-select: none;
@@ -46,10 +43,8 @@
     .tab.active {
       opacity: 1;
       border-bottom: 2px solid #9b87c4;
-      font-weight: 600;
     }
 
-    /* ---------- GRID ---------- */
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -71,16 +66,14 @@
       object-fit: cover;
     }
 
-    /* ---------- PINNED ---------- */
     .pinned::after {
       content: "";
       position: absolute;
       bottom: 4px;
       left: 4px;
-      font-size: 12px;
-      background: rgba(255,255,255,0.9);
+      width: 14px;
+      height: 14px;
       border-radius: 999px;
-      padding: 2px 5px;
       animation: pulse 1.8s infinite;
     }
 
@@ -90,7 +83,6 @@
       100% { box-shadow: 0 0 0 0 rgba(255,215,160,0); }
     }
 
-    /* ---------- FOOTER ---------- */
     .footer {
       padding: 14px;
       text-align: center;
@@ -107,18 +99,21 @@
       box-shadow: 0 0 12px rgba(213,231,204,0.6);
     }
 
-    /* ---------- ACCESS ---------- */
-    .center {
+    .center.unlock-screen {
       padding: 28px;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
     }
 
     input {
       width: 100%;
+      max-width: 260px;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ddd;
-      margin-bottom: 12px;
+      text-align: center;
     }
 
     .unlock {
@@ -128,35 +123,8 @@
       border-radius: 999px;
       font-weight: 600;
       cursor: pointer;
+      min-width: 190px;
     }
-
-    /* ---------- ACCESS SCREEN LAYOUT ---------- */
-  .center.unlock-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 24px;
-  }
-
-  .center.unlock-screen input {
-    width: 100%;
-    max-width: 260px;
-    box-sizing: border-box;
-    text-align: center;
-  }
-
-  .center.unlock-screen .unlock {
-    min-width: 190px;
-    text-align: center;
-  }
-
-  /* ---------- CLICK SAFETY ---------- */
-  .app {
-    position: relative;
-    pointer-events: auto;
-  }
   </style>
 </head>
 
@@ -166,7 +134,7 @@
 <script>
   /* ---------- CONFIG ---------- */
   const ACCESS_KEY = "insta_widget_access";
-  let activeTab = "post"; // post | reel
+  let activeTab = "post";
 
   /* ---------- API ---------- */
   async function checkAccess(token) {
@@ -183,36 +151,43 @@
     return await res.json();
   }
 
- /* ---------- ACCESS UI ---------- */
-function renderUnlock() {
-  document.getElementById("app").innerHTML = `
-    <div class="center unlock-screen">
-      <input
-        placeholder="Enter access code"
-        id="code"
-        autocomplete="off"
-      />
-      <button class="unlock" id="unlockBtn">
-        Unlock Insta Widget
-      </button>
-    </div>
-  `;
+  /* ---------- ACCESS ---------- */
+  function renderUnlock() {
+    document.getElementById("app").innerHTML = `
+      <div class="center unlock-screen">
+        <input id="code" placeholder="Enter access code" autocomplete="off" />
+        <button class="unlock" id="unlockBtn">Unlock Insta Widget</button>
+      </div>
+    `;
 
-  // 🔐 bind click AFTER render (Notion-safe)
-  document
-    .getElementById("unlockBtn")
-    .addEventListener("click", unlock);
-}
+    document
+      .getElementById("unlockBtn")
+      .addEventListener("click", unlock);
+  }
 
-  /* ---------- MAIN WIDGET ---------- */
+  async function unlock() {
+    const token = document.getElementById("code").value.trim();
+    if (!token) return;
+
+    const result = await checkAccess(token);
+
+    if (result.allowed) {
+      localStorage.setItem(ACCESS_KEY, token);
+      loadWidget();
+    } else {
+      alert("Access paused 🌙");
+    }
+  }
+
+  /* ---------- MAIN ---------- */
   async function loadWidget() {
     const data = await fetchPosts();
 
     const filtered = data
       .filter(p =>
-        p.show === true &&                       // user explicitly opted in
+        p.show === true &&
         Array.isArray(p.platform) &&
-        p.platform.includes("Instagram") &&     // platform-safe
+        p.platform.includes("Instagram") &&
         (activeTab === "reel"
           ? Array.isArray(p.type) && p.type.includes("Reel")
           : true)
@@ -221,79 +196,39 @@ function renderUnlock() {
       .slice(0, 15);
 
     document.getElementById("app").innerHTML = `
-  <div class="tabs">
-    <div class="tab ${activeTab==="post"?"active":""}" onclick="switchTab('post')">
-      <img src="YOUR_GRID_ICON_URL_HERE" alt="Posts" width="22" />
-    </div>
-
-    <div class="tab ${activeTab==="reel"?"active":""}" onclick="switchTab('reel')">
-      <img src="YOUR_REELS_ICON_URL_HERE" alt="Reels" width="22" />
-    </div>
-  </div>
-
-  <div class="grid">
-    ${filtered.map(p => `
-      <div class="cell ${p.pinned ? "pinned" : ""}">
-        
-        ${p.image ? `<img src="${p.image}" />` : ""}
-
-        ${p.pinned ? `
-          <img
-            src="YOUR_PINNED_ICON_URL_HERE"
-            style="
-              position:absolute;
-              bottom:4px;
-              left:4px;
-              width:14px;
-              height:14px;
-              z-index:2;
-            "
-          />
-        ` : ""}
-
-        ${p.is_carousel ? `
-          <img
-            src="YOUR_CAROUSEL_ICON_URL_HERE"
-            style="
-              position:absolute;
-              top:4px;
-              right:4px;
-              width:14px;
-              height:14px;
-            "
-          />
-        ` : ""}
-
-        ${Array.isArray(p.type) && p.type.includes("Reel") ? `
-          <img
-            src="YOUR_REEL_VIDEO_ICON_URL_HERE"
-            style="
-              position:absolute;
-              top:4px;
-              right:4px;
-              width:14px;
-              height:14px;
-            "
-          />
-        ` : ""}
+      <div class="tabs">
+        <div class="tab ${activeTab==="post"?"active":""}" onclick="switchTab('post')">
+          <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22"/>
+        </div>
+        <div class="tab ${activeTab==="reel"?"active":""}" onclick="switchTab('reel')">
+          <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22"/>
+        </div>
       </div>
-    `).join("")}
 
-    ${Array.from({ length: Math.max(0, 15 - filtered.length) })
-      .map(() => `<div class="cell"></div>`)
-      .join("")}
-  </div>
+      <div class="grid">
+        ${filtered.map(p => `
+          <div class="cell ${p.pinned ? "pinned":""}">
+            ${p.image ? `<img src="${p.image}"/>` : ""}
+          </div>
+        `).join("")}
+        ${Array.from({length: Math.max(0,15-filtered.length)}).map(()=>`<div class="cell"></div>`).join("")}
+      </div>
 
-  <div class="footer">
-    <button class="refresh" onclick="loadWidget()">Refresh</button>
-  </div>
-`;
+      <div class="footer">
+        <button class="refresh" onclick="loadWidget()">Refresh</button>
+      </div>
+    `;
   }
 
   function switchTab(tab) {
     activeTab = tab;
     loadWidget();
   }
+
+  /* ---------- EXPOSE FOR NOTION ---------- */
+  window.unlock = unlock;
+  window.loadWidget = loadWidget;
+  window.switchTab = switchTab;
 
   /* ---------- BOOT ---------- */
   const saved = localStorage.getItem(ACCESS_KEY);
