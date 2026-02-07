@@ -102,5 +102,11 @@
         <button class="refresh">Refresh</button>
       </div>
     </div>
+    <script>
+  async function fetchNotionPosts() {
+    const res = await fetch("/api/notion");
+    return await res.json();
+  }
+</script>
   </body>
 </html>
