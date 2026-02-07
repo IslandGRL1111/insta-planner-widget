@@ -125,6 +125,17 @@
       cursor: pointer;
       min-width: 190px;
     }
+
+    /* ---------- FORCE CLICKABILITY (NOTION + SAFARI FIX) ---------- */
+.unlock-screen,
+.unlock-screen * {
+  pointer-events: auto !important;
+  z-index: 10;
+}
+
+.unlock {
+  cursor: pointer;
+}
   </style>
 </head>
 
@@ -153,16 +164,18 @@ async function fetchPosts() {
 
 /* ---------- ACCESS UI ---------- */
 function renderUnlock() {
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
+  document.getElementById("app").innerHTML = `
     <div class="center unlock-screen">
-      <input id="code" placeholder="Enter access code" autocomplete="off" />
-      <button class="unlock" id="unlockBtn">Unlock Insta Widget</button>
+      <input
+        id="code"
+        placeholder="Enter access code"
+        autocomplete="off"
+      />
+      <button class="unlock" onclick="unlock()">
+        Unlock Insta Widget
+      </button>
     </div>
   `;
-
-  document.getElementById("unlockBtn").onclick = unlock;
 }
 
 async function unlock() {
