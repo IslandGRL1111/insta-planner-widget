@@ -6,6 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #F4EFFA, #FAF5FF);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  }
+
+  .app {
+    max-width: 380px;
+    margin: auto;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+
+  .header {
+    padding: 12px;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .cell {
+    aspect-ratio: 4 / 5;
+    background: #eaeaea;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .footer {
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .refresh {
+    background: #D5E7CC;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+</style>
+
+    <style>
       body {
         margin: 0;
         padding: 0;
@@ -76,37 +137,45 @@
   </head>
 
   <body>
-    <div class="widget">
-      <!-- HEADER -->
-      <div class="header">
-        <div class="tab active">Posts</div>
-        <div class="tab">Reels</div>
-        <div class="tab">Tagged</div>
-      </div>
-
-      <!-- GRID -->
-      <div class="grid">
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-        <div class="cell"></div>
-      </div>
-
-      <!-- FOOTER -->
-      <div class="footer">
-        <button class="refresh">Refresh</button>
-      </div>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <h3>Instagram Planner</h3>
     </div>
-    <script>
-  async function fetchNotionPosts() {
-    const res = await fetch("/api/notion");
-    return await res.json();
-  }
-</script>
-  </body>
+
+    <!-- Grid -->
+    <div id="grid" class="grid"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button class="refresh" onclick="loadPosts()">Refresh</button>
+    </div>
+  </div>
+
+  <script>
+    async function loadPosts() {
+      const res = await fetch("/api/notion");
+      const posts = await res.json();
+
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+
+      posts.slice(0, 9).forEach(post => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+
+        if (post.image) {
+          const img = document.createElement("img");
+          img.src = post.image;
+          img.alt = "";
+          cell.appendChild(img);
+        }
+
+        grid.appendChild(cell);
+      });
+    }
+
+    loadPosts();
+  </script>
+</body>
 </html>
