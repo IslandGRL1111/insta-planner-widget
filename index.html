@@ -5,152 +5,52 @@
   <title>Insta Planner Widget</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: linear-gradient(135deg, #F4EFFA, #FAF5FF);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+  <script>
+  const ACCESS_KEY = "insta_widget_access";
+
+  function renderUnlock() {
+    document.getElementById("app").innerHTML = `
+      <div class="center unlock-screen">
+        <input id="code" placeholder="Enter access code" />
+        <button class="unlock" id="unlockBtn">
+          Unlock Insta Widget
+        </button>
+      </div>
+    `;
+
+    document
+      .getElementById("unlockBtn")
+      .addEventListener("click", unlock);
+  }
+
+  function unlock() {
+    const token = document.getElementById("code").value;
+
+    if (!token) {
+      console.log("No token entered");
+      return;
     }
 
-    .app {
-      width: 380px;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-      overflow: hidden;
-      position: relative;
-    }
+    // TEMP SAFE UNLOCK (no API, no alert)
+    localStorage.setItem(ACCESS_KEY, token);
+    loadWidget();
+  }
 
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-    }
+  function loadWidget() {
+    document.getElementById("app").innerHTML = `
+      <div class="center">
+        <strong>✨ Widget Unlocked ✨</strong>
+      </div>
+    `;
+  }
 
-    .tab {
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      opacity: 0.5;
-      user-select: none;
-    }
-
-    .tab.active {
-      opacity: 1;
-      border-bottom: 2px solid #9b87c4;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      padding: 12px;
-    }
-
-    .cell {
-      aspect-ratio: 4 / 5;
-      background: rgba(0,0,0,0.06);
-      border-radius: 6px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cell img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .pinned::after {
-      content: "";
-      position: absolute;
-      bottom: 4px;
-      left: 4px;
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      animation: pulse 1.8s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255,215,160,0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(255,215,160,0); }
-      100% { box-shadow: 0 0 0 0 rgba(255,215,160,0); }
-    }
-
-    .footer {
-      padding: 14px;
-      text-align: center;
-      border-top: 1px solid rgba(0,0,0,0.08);
-    }
-
-    .refresh {
-      background: #D5E7CC;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 500;
-      box-shadow: 0 0 12px rgba(213,231,204,0.6);
-    }
-
-    .center.unlock-screen {
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-
-    input {
-      width: 100%;
-      max-width: 260px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-
-    .unlock {
-      background: #E6DBFF;
-      border: none;
-      padding: 10px 22px;
-      border-radius: 999px;
-      font-weight: 600;
-      cursor: pointer;
-      min-width: 190px;
-    }
-
-    /* ---------- FORCE CLICKABILITY (NOTION + SAFARI FIX) ---------- */
-.unlock-screen,
-.unlock-screen * {
-  pointer-events: auto !important;
-  z-index: 10;
-}
-
-.unlock {
-  cursor: pointer;
-}
-  </style>
-</head>
-
-<body>
-<div class="app" id="app"></div>
-
-<script>
-  document.getElementById("app").innerHTML = `
-    <div class="center unlock-screen">
-      <input placeholder="Enter access code" />
-      <button class="unlock" onclick="alert('CLICK WORKS 🌸')">
-        Unlock Insta Widget
-      </button>
-    </div>
-  `;
+  // BOOT
+  const saved = localStorage.getItem(ACCESS_KEY);
+  if (saved) {
+    loadWidget();
+  } else {
+    renderUnlock();
+  }
 </script>
 </body>
 </html>
