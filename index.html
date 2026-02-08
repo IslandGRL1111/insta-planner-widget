@@ -5,52 +5,104 @@
   <title>Insta Planner Widget</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <script>
-  const ACCESS_KEY = "insta_widget_access";
-
-  function renderUnlock() {
-    document.getElementById("app").innerHTML = `
-      <div class="center unlock-screen">
-        <input id="code" placeholder="Enter access code" />
-        <button class="unlock" id="unlockBtn">
-          Unlock Insta Widget
-        </button>
-      </div>
-    `;
-
-    document
-      .getElementById("unlockBtn")
-      .addEventListener("click", unlock);
-  }
-
-  function unlock() {
-    const token = document.getElementById("code").value;
-
-    if (!token) {
-      console.log("No token entered");
-      return;
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(135deg, #F4EFFA, #FAF5FF);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
-    // TEMP SAFE UNLOCK (no API, no alert)
-    localStorage.setItem(ACCESS_KEY, token);
-    loadWidget();
-  }
+    .app {
+      width: 380px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
 
-  function loadWidget() {
-    document.getElementById("app").innerHTML = `
-      <div class="center">
-        <strong>✨ Widget Unlocked ✨</strong>
-      </div>
-    `;
-  }
+    .center.unlock-screen {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
 
-  // BOOT
-  const saved = localStorage.getItem(ACCESS_KEY);
-  if (saved) {
-    loadWidget();
-  } else {
-    renderUnlock();
-  }
-</script>
+    input {
+      width: 100%;
+      max-width: 260px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .unlock {
+      background: #E6DBFF;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 190px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🔑 THIS WAS MISSING -->
+  <div class="app" id="app"></div>
+
+  <!-- 🔐 SCRIPT MUST COME AFTER -->
+  <script>
+    const ACCESS_KEY = "insta_widget_access";
+
+    function renderUnlock() {
+      document.getElementById("app").innerHTML = `
+        <div class="center unlock-screen">
+          <input id="code" placeholder="Enter access code" />
+          <button class="unlock" id="unlockBtn">
+            Unlock Insta Widget
+          </button>
+        </div>
+      `;
+
+      document
+        .getElementById("unlockBtn")
+        .addEventListener("click", unlock);
+    }
+
+    function unlock() {
+      const token = document.getElementById("code").value;
+
+      if (!token) return;
+
+      localStorage.setItem(ACCESS_KEY, token);
+      loadWidget();
+    }
+
+    function loadWidget() {
+      document.getElementById("app").innerHTML = `
+        <div class="center">
+          <strong>✨ Widget Unlocked ✨</strong>
+        </div>
+      `;
+    }
+
+    // BOOT
+    const saved = localStorage.getItem(ACCESS_KEY);
+    if (saved) {
+      loadWidget();
+    } else {
+      renderUnlock();
+    }
+  </script>
+
 </body>
 </html>
