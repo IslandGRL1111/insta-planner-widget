@@ -4,12 +4,9 @@ export default function Home() {
   const ACCESS_KEY = "insta_widget_access";
 
   const [accessCode, setAccessCode] = useState("");
-  const [status, setStatus] = useState("checking"); 
+  const [status, setStatus] = useState("checking");
   // checking | locked | loading | allowed | error
 
-  /* ------------------------------
-     CHECK EXISTING TOKEN ON LOAD
-  ------------------------------ */
   useEffect(() => {
     const saved = localStorage.getItem(ACCESS_KEY);
 
@@ -21,9 +18,6 @@ export default function Home() {
     verifyToken(saved);
   }, []);
 
-  /* ------------------------------
-     VERIFY TOKEN VIA API
-  ------------------------------ */
   async function verifyToken(token) {
     try {
       const res = await fetch("/api/check-widget-token", {
@@ -46,9 +40,6 @@ export default function Home() {
     }
   }
 
-  /* ------------------------------
-     HANDLE UNLOCK CLICK
-  ------------------------------ */
   async function handleUnlock() {
     if (!accessCode.trim()) {
       alert("🌿 Enter your access code first");
@@ -59,84 +50,81 @@ export default function Home() {
     await verifyToken(accessCode.trim());
   }
 
-  /* ------------------------------
-     UI STATES
-  ------------------------------ */
+  const containerStyle = {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    paddingTop: "60px",
+    background: "linear-gradient(135deg, #F4EFFA, #FAF5FF)",
+    fontFamily: "system-ui",
+  };
+
+  const cardStyle = {
+    background: "rgba(255,255,255,0.85)",
+    backdropFilter: "blur(10px)",
+    padding: "28px",
+    borderRadius: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "14px",
+    width: "300px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.12)",
+  };
+
+  const buttonStyle = {
+    background: "#E6DBFF",
+    border: "none",
+    padding: "10px 22px",
+    borderRadius: "999px",
+    fontWeight: 600,
+    cursor: "pointer",
+  };
 
   if (status === "checking") {
-    return (
-      <Centered>
-        <div>Checking access…</div>
-      </Centered>
-    );
+    return <div style={containerStyle}>Checking access…</div>;
   }
 
   if (status === "locked") {
     return (
-      <Centered>
-        <div className="unlock-card">
+      <div style={containerStyle}>
+        <div style={cardStyle}>
           <input
             value={accessCode}
             onChange={(e) => setAccessCode(e.target.value)}
             placeholder="Enter access code"
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ddd",
+              textAlign: "center",
+            }}
           />
-          <button
-            className="unlock"
-            onClick={handleUnlock}
-          >
+          <button style={buttonStyle} onClick={handleUnlock}>
             Unlock Insta Widget
           </button>
         </div>
-      </Centered>
+      </div>
     );
   }
 
   if (status === "loading") {
-    return (
-      <Centered>
-        <div>Verifying… ✨</div>
-      </Centered>
-    );
+    return <div style={containerStyle}>Verifying… ✨</div>;
   }
 
   if (status === "error") {
-    return (
-      <Centered>
-        <div>Connection issue… try again ✨</div>
-      </Centered>
-    );
+    return <div style={containerStyle}>Connection issue… try again ✨</div>;
   }
 
   if (status === "allowed") {
     return (
-      <Centered>
-        <div>
+      <div style={containerStyle}>
+        <div style={cardStyle}>
           <strong>✨ Widget Unlocked ✨</strong>
         </div>
-      </Centered>
+      </div>
     );
   }
 
   return null;
-}
-
-/* ------------------------------
-   CENTER WRAPPER
------------------------------- */
-function Centered({ children }) {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        paddingTop: 60,
-        background: "linear-gradient(135deg, #F4EFFA, #FAF5FF)",
-        fontFamily: "system-ui",
-      }}
-    >
-      {children}
-    </div>
-  );
 }
