@@ -16,8 +16,8 @@ export default async function handler(req, res) {
   const posts = json.results
   .filter(p =>
     p.properties["Show in Widget"]?.checkbox === true &&
-    p.properties["Platform Name"]?.multi_select.some(x => x.name === "Instagram")
-    p.properties["Status"]?.status?.name === "Scheduled"
+    p.properties["Platform Name"]?.multi_select.some(x => x.name === "🩷Instagram")
+    p.properties["Status"]?.status?.name === "🕒Scheduled"
   )
   .map(p => ({
     id: p.id,
