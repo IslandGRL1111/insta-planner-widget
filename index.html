@@ -131,15 +131,54 @@ async function unlock() {
 }
 
 /* ---------- MAIN WIDGET ---------- */
-function loadWidget() {
-  document.getElementById("app").innerHTML = `
+async function loadWidget() {
+  const app = document.getElementById("app");
+
+  app.innerHTML = `
     <div class="center">
-      <strong>✨ Widget Unlocked ✨</strong>
-    </div>
-    <div class="footer">
-      <button class="refresh" onclick="loadWidget()">Refresh</button>
+      <strong>Loading your planner… ✨</strong>
     </div>
   `;
+
+  try {
+    const res = await fetch("/api/notion");
+    const data = await res.json();
+
+    if (!data || !data.length) {
+      app.innerHTML = `
+        <div class="center">
+          <strong>No posts to show yet 🌿</strong>
+        </div>
+      `;
+      return;
+    }
+
+    app.innerHTML = `
+      <div class="posts">
+        ${data.map(post => `
+          <div class="card">
+            <div><strong>Platform:</strong> ${post.platform?.join(", ") || "—"}</div>
+            <div><strong>Type:</strong> ${post.type?.join(", ") || "—"}</div>
+            <div><strong>Pinned:</strong> ${post.pinned ? "Yes" : "No"}</div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="footer">
+        <button class="refresh" onclick="loadWidget()">Refresh</button>
+      </div>
+    `;
+
+  } catch (err) {
+    app.innerHTML = `
+      <div class="center">
+        <strong>Couldn’t load posts 😭</strong>
+      </div>
+      <div class="footer">
+        <button class="refresh" onclick="loadWidget()">Retry</button>
+      </div>
+    `;
+  }
 }
 
 /* ---------- BOOT ---------- */
