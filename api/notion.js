@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const posts = json.results
   .filter(p =>
     p.properties["Show in Widget"]?.checkbox === true &&
-    p.properties["Platform Name"]?.multi_select.some(x => x.name === "🩷Instagram")
+    p.properties["Platform Name"]?.multi_select?.some(x => x.name === "🩷Instagram") &&
     p.properties["Status"]?.status?.name === "🕒Scheduled"
   )
   .map(p => ({
@@ -24,8 +24,8 @@ export default async function handler(req, res) {
     pinned: p.properties["Pin Post?"]?.checkbox || false,
     title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
     date: p.properties["Scheduled Date & Time"]?.date?.start || null,
-    platform: p.properties["Platform Name"]?.multi_select.map(x=>x.name) || [],
-    type: p.properties["Type of Post"]?.multi_select.map(x=>x.name) || [],
+    platform: p.properties["Platform Name"]?.multi_select?.map(x=>x.name) || [],
+    type: p.properties["Type of Post"]?.multi_select?.map(x=>x.name) || [],
     images: p.properties["Post Preview"]?.files?.map(f => f.file?.url) || [],
   }));
 
