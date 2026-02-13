@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Insta Planner Widget</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+<style>
+body {
+  margin: 0;
+  font-family: system-ui;
+  background: linear-gradient(135deg,#F4EFFA,#FAF5FF);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 0;
+}
+
+.app {
+  width: 380px;
+  min-height: 620px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+.center {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+input {
+  width: 100%;
+  max-width: 260px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.unlock {
+  background: #E6DBFF;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 190px;
+  transition: transform .15s ease;
+}
+
+.unlock:active {
+  transform: scale(.97);
+}
+
+.footer {
+  padding: 14px;
+  text-align: center;
+}
+
+.refresh {
+  background: #D5E7CC;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const ACCESS_KEY = "insta_widget_access";
+
+/* ---------- ACCESS CHECK ---------- */
+async function checkAccess(token) {
+  const res = await fetch("/api/check-widget-token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+
+  return await res.json();
+}
+
+/* ---------- UNLOCK SCREEN ---------- */
+function renderUnlock() {
+  document.getElementById("app").innerHTML = `
+    <div class="center">
+      <input id="code" placeholder="Enter access code" autocomplete="off" />
+      <button class="unlock" id="unlockBtn">
+        Unlock Insta Widget
+      </button>
+    </div>
+  `;
+
+  document.getElementById("unlockBtn")
+    .addEventListener("click", unlock);
+}
+
+async function unlock() {
+  const input = document.getElementById("code");
+  const token = input.value.trim();
+
+  if (!token) {
+    alert("🌿 Enter your access code first.");
+    return;
+  }
+
+  try {
+    const result = await checkAccess(token);
+
+    if (result.allowed) {
+      localStorage.setItem(ACCESS_KEY, token);
+      loadWidget();
+    } else {
+      alert("✨ Access paused or invalid.");
+    }
+
+  } catch {
+    alert("Connection issue... try again ✨");
+  }
+}
+
+/* ---------- MAIN WIDGET ---------- */
+function loadWidget() {
+  document.getElementById("app").innerHTML = `
+    <div class="center">
+      <strong>✨ Widget Unlocked ✨</strong>
+    </div>
+    <div class="footer">
+      <button class="refresh" onclick="loadWidget()">Refresh</button>
+    </div>
+  `;
+}
+
+/* ---------- BOOT ---------- */
+const saved = localStorage.getItem(ACCESS_KEY);
+if (saved) {
+  loadWidget();
+} else {
+  renderUnlock();
+}
+</script>
+
+</body>
+</html>
