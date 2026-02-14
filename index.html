@@ -270,30 +270,6 @@ function bindReveal(total) {
 
 renderGrid();
 
-    app.innerHTML = `
-      <div class="widget">
-
-        <div class="tabs">
-          <button class="tab active" data-view="grid">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
-          </button>
-
-          <button class="tab" data-view="reels">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
-          </button>
-        </div>
-
-        <div class="grid" id="grid"></div>
-
-        <div class="footer">
-          <button class="refresh" onclick="loadWidget()">Refresh</button>
-        </div>
-
-      </div>
-    `;
-
-    setupTabs();
-
   } catch (err) {
     app.innerHTML = `
       <div class="center">
