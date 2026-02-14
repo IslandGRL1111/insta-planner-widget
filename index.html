@@ -145,29 +145,111 @@ async function loadWidget() {
     const data = await res.json();
 
     if (!data || !data.length) {
-      app.innerHTML = `
-        <div class="center">
-          <strong>No posts to show yet 🌿</strong>
+  app.innerHTML = `
+    <div class="center">
+      <strong>No scheduled Instagram posts yet 🌿</strong>
+    </div>
+  `;
+  return;
+}
+
+/* ---------- STATE ---------- */
+let currentView = "grid";
+let visibleCount = 9;
+
+/* ---------- SORT PINNED FIRST ---------- */
+const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+
+/* ---------- RENDER FUNCTION ---------- */
+function renderGrid() {
+
+  const filtered =
+    currentView === "reels"
+      ? sorted.filter(p => p.type?.includes("Reel"))
+      : sorted;
+
+  const visiblePosts = filtered.slice(0, visibleCount);
+
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+        <img src="YOUR_GRID_ICON_URL" width="22" />
+      </button>
+
+      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+        <img src="YOUR_REELS_ICON_URL" width="22" />
+      </button>
+    </div>
+
+    <div class="grid">
+      ${visiblePosts.map(p => `
+        <div class="cell ${p.pinned ? "pinned" : ""}">
+          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
         </div>
-      `;
-      return;
+      `).join("")}
+
+      ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
+        .map(() => `<div class="cell"></div>`)
+        .join("")}
+    </div>
+
+    <div class="footer">
+      <button class="refresh" id="refreshBtn">Reveal More</button>
+    </div>
+  `;
+
+  bindTabs();
+  bindReveal(filtered.length);
+}
+
+/* ---------- TAB SWITCH ---------- */
+function bindTabs() {
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      currentView = tab.dataset.view;
+      visibleCount = 9;
+      renderGrid();
+    });
+  });
+}
+
+/* ---------- PROGRESSIVE REVEAL ---------- */
+function bindReveal(total) {
+  const btn = document.getElementById("refreshBtn");
+
+  btn.addEventListener("click", () => {
+    if (visibleCount < 36 && visibleCount < total) {
+      visibleCount += 9;
+      renderGrid();
     }
+  });
+}
+
+renderGrid();
 
     app.innerHTML = `
-      <div class="posts">
-        ${data.map(post => `
-          <div class="card">
-            <div><strong>Platform:</strong> ${post.platform?.join(", ") || "—"}</div>
-            <div><strong>Type:</strong> ${post.type?.join(", ") || "—"}</div>
-            <div><strong>Pinned:</strong> ${post.pinned ? "Yes" : "No"}</div>
-          </div>
-        `).join("")}
-      </div>
+      <div class="widget">
 
-      <div class="footer">
-        <button class="refresh" onclick="loadWidget()">Refresh</button>
+        <div class="tabs">
+          <button class="tab active" data-view="grid">
+            <img src="YOUR_GRID_ICON_URL" />
+          </button>
+
+          <button class="tab" data-view="reels">
+            <img src="YOUR_REELS_ICON_URL" />
+          </button>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="footer">
+          <button class="refresh" onclick="loadWidget()">Refresh</button>
+        </div>
+
       </div>
     `;
+
+    setupTabs();
 
   } catch (err) {
     app.innerHTML = `
@@ -179,6 +261,21 @@ async function loadWidget() {
       </div>
     `;
   }
+}
+
+  /* ---------- TAB LOGIC ---------- */
+function setupTabs() {
+  const tabs = document.querySelectorAll(".tab");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      const view = tab.dataset.view;
+      console.log("Switched to:", view);
+    });
+  });
 }
 
 /* ---------- BOOT ---------- */
