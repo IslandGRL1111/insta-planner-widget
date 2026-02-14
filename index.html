@@ -98,17 +98,20 @@ input {
 }
 
 .cell {
-  aspect-ratio: 1/1;
-  background: #F4EFFA;
-  border-radius: 8px;
-  overflow: hidden;
   position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #EFE7FA;
 }
 
 .cell img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .cell.pinned {
