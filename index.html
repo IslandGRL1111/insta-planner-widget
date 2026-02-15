@@ -93,24 +93,26 @@ input {
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  padding: 8px 12px 16px;
+  gap: 8px; /* tighter like Insta */
+  padding: 0 16px 16px;
 }
 
 .cell {
   position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;  /* portrait */
   overflow: hidden;
-  aspect-ratio: 4 / 5;
-  border-radius: 10px;
+  border-radius: 8px;   /* softer but subtle */
   background: #EDE6F5;
 }
 
 .cell img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  display: block;
 }
 
 .cell.pinned {
