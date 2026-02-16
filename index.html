@@ -35,15 +35,6 @@ body {
   gap: 14px;
 }
 
-input {
-  width: 100%;
-  max-width: 260px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  text-align: center;
-}
-
 .unlock {
   background: #E6DBFF;
   border: none;
@@ -52,44 +43,29 @@ input {
   font-weight: 600;
   cursor: pointer;
   min-width: 190px;
-  transition: transform .15s ease;
-}
-
-.unlock:active {
-  transform: scale(.97);
 }
 
 .footer {
-  padding: 14px;
+  padding: 18px;
   text-align: center;
 }
 
 .refresh {
   background: #D5E7CC;
   border: none;
-  padding: 8px 18px;
+  padding: 10px 22px;
   border-radius: 999px;
   cursor: pointer;
+  font-weight: 600;
 }
 
- .tabs {
+/* ---------- TABS ---------- */
+.tabs {
   display: flex;
-  justify-content: flex-start;
   gap: 28px;
-  padding: 18px 18px 8px;
+  padding: 18px 18px 10px;
   position: relative;
   border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-  .indicator {
-  position: absolute;
-  bottom: 0;
-  left: 18px;
-  width: 28px;
-  height: 3px;
-  background: #B39DDB;
-  border-radius: 2px;
-  transition: transform .25s ease;
 }
 
 .tab {
@@ -105,17 +81,29 @@ input {
   opacity: 1;
 }
 
+.indicator {
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  width: 26px;
+  height: 3px;
+  background: #B39DDB;
+  border-radius: 2px;
+  transition: transform .25s ease;
+}
+
+/* ---------- GRID ---------- */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;                /* tighter spacing */
-  padding: 16px 16px 8px;  /* cleaner alignment */
+  gap: 6px;
+  padding: 16px;
 }
 
 .cell {
   position: relative;
   aspect-ratio: 4 / 5;
-  border-radius: 10px;     /* softer, less bubbly */
+  border-radius: 10px;
   overflow: hidden;
   background: #EDE7F6;
 }
@@ -127,6 +115,7 @@ input {
   object-position: center;
   display: block;
 }
+
 .cell.pinned {
   box-shadow: 0 0 0 2px #E6DBFF inset;
 }
@@ -138,56 +127,6 @@ input {
 
 <script>
 const ACCESS_KEY = "insta_widget_access";
-
-/* ---------- ACCESS CHECK ---------- */
-async function checkAccess(token) {
-  const res = await fetch("/api/check-widget-token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token })
-  });
-
-  return await res.json();
-}
-
-/* ---------- UNLOCK SCREEN ---------- */
-function renderUnlock() {
-  document.getElementById("app").innerHTML = `
-    <div class="center">
-      <input id="code" placeholder="Enter access code" autocomplete="off" />
-      <button class="unlock" id="unlockBtn">
-        Unlock Insta Widget
-      </button>
-    </div>
-  `;
-
-  document.getElementById("unlockBtn")
-    .addEventListener("click", unlock);
-}
-
-async function unlock() {
-  const input = document.getElementById("code");
-  const token = input.value.trim();
-
-  if (!token) {
-    alert("🌿 Enter your access code first.");
-    return;
-  }
-
-  try {
-    const result = await checkAccess(token);
-
-    if (result.allowed) {
-      localStorage.setItem(ACCESS_KEY, token);
-      loadWidget();
-    } else {
-      alert("✨ Access paused or invalid.");
-    }
-
-  } catch {
-    alert("Connection issue... try again ✨");
-  }
-}
 
 /* ---------- MAIN WIDGET ---------- */
 async function loadWidget() {
@@ -204,136 +143,106 @@ async function loadWidget() {
     const data = await res.json();
 
     if (!data || !data.length) {
-  app.innerHTML = `
-    <div class="center">
-      <strong>No scheduled Instagram posts yet 🌿</strong>
-    </div>
-  `;
-  return;
-}
-
-/* ---------- STATE ---------- */
-let currentView = "grid";
-let visibleCount = 9;
-
-/* ---------- SORT PINNED FIRST ---------- */
-const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
-
-/* ---------- RENDER FUNCTION ---------- */
-function renderGrid() {
-
-  const filtered =
-    currentView === "reels"
-      ? sorted.filter(p => p.type?.includes("Reel"))
-      : sorted;
-
-  const visiblePosts = filtered.slice(0, visibleCount);
-
-  app.innerHTML = `
-    <div class="tabs">
-      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
-      </button>
-
-      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
-      </button>
-
-      <div class="indicator"></div
-    </div>
-
-    <div class="grid">
-      ${visiblePosts.map(p => `
-        <div class="cell ${p.pinned ? "pinned" : ""}">
-          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
+      app.innerHTML = `
+        <div class="center">
+          <strong>No scheduled Instagram posts yet 🌿</strong>
         </div>
-      `).join("")}
-
-      ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
-        .map(() => `<div class="cell"></div>`)
-        .join("")}
-    </div>
-
-    <div class="footer">
-      <button class="refresh" id="refreshBtn">Reveal More</button>
-    </div>
-  `;
-
-  bindTabs();
-  bindReveal(filtered.length);
-}
-    const indicator = document.querySelector(".indicator");
-if (indicator) {
-  indicator.style.transform =
-    currentView === "reels" ? "translateX(50px)" : "translateX(0px)";
-}
-
-/* ---------- TAB SWITCH ---------- */
-function bindTabs() {
-  const tabs = document.querySelectorAll(".tab");
-  const indicator = document.querySelector(".indicator");
-
-  tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => {
-      currentView = tab.dataset.view;
-      visibleCount = 12;
-
-      // move indicator
-      indicator.style.transform = `translateX(${index * 50}px)`;
-
-      renderGrid();
-    });
-  });
-}
-
-/* ---------- PROGRESSIVE REVEAL ---------- */
-function bindReveal(total) {
-  const btn = document.getElementById("refreshBtn");
-
-  btn.addEventListener("click", () => {
-    if (visibleCount < 36 && visibleCount < total) {
-      visibleCount += 12;
-      renderGrid();
+      `;
+      return;
     }
-  });
-}
 
-renderGrid();
+    let currentView = "grid";
+    let visibleCount = 12;
+
+    const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+
+    function renderGrid() {
+
+      const filtered =
+        currentView === "reels"
+          ? sorted.filter(p => p.type?.includes("Reel"))
+          : sorted;
+
+      const visiblePosts = filtered.slice(0, visibleCount);
+
+      app.innerHTML = `
+        <div class="tabs">
+          <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
+          </button>
+
+          <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
+          </button>
+
+          <div class="indicator"></div>
+        </div>
+
+        <div class="grid">
+          ${visiblePosts.map(p => `
+            <div class="cell ${p.pinned ? "pinned" : ""}">
+              ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
+            </div>
+          `).join("")}
+
+          ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
+            .map(() => `<div class="cell"></div>`)
+            .join("")}
+        </div>
+
+        <div class="footer">
+          <button class="refresh" id="refreshBtn">Reveal More</button>
+        </div>
+      `;
+
+      bindTabs();
+      bindReveal(filtered.length);
+
+      const indicator = document.querySelector(".indicator");
+      if (indicator) {
+        indicator.style.transform =
+          currentView === "reels"
+            ? "translateX(50px)"
+            : "translateX(0px)";
+      }
+    }
+
+    function bindTabs() {
+      const tabs = document.querySelectorAll(".tab");
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          currentView = tab.dataset.view;
+          visibleCount = 12;
+          renderGrid();
+        });
+      });
+    }
+
+    function bindReveal(total) {
+      const btn = document.getElementById("refreshBtn");
+
+      btn.addEventListener("click", () => {
+        if (visibleCount < 36 && visibleCount < total) {
+          visibleCount += 12;
+          renderGrid();
+        }
+      });
+    }
+
+    renderGrid();
 
   } catch (err) {
     app.innerHTML = `
       <div class="center">
         <strong>Couldn’t load posts 😭</strong>
       </div>
-      <div class="footer">
-        <button class="refresh" onclick="loadWidget()">Retry</button>
-      </div>
     `;
   }
 }
 
-  /* ---------- TAB LOGIC ---------- */
-function setupTabs() {
-  const tabs = document.querySelectorAll(".tab");
-
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-
-      const view = tab.dataset.view;
-      console.log("Switched to:", view);
-    });
-  });
-}
-
 /* ---------- BOOT ---------- */
-const saved = localStorage.getItem(ACCESS_KEY);
-if (saved) {
-  loadWidget();
-} else {
-  renderUnlock();
-}
+loadWidget();
 </script>
 
 </body>
