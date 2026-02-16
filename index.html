@@ -81,6 +81,17 @@ input {
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
+  .indicator {
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  width: 28px;
+  height: 3px;
+  background: #B39DDB;
+  border-radius: 2px;
+  transition: transform .25s ease;
+}
+
 .tab {
   background: none;
   border: none;
@@ -227,6 +238,8 @@ function renderGrid() {
       <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
         <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
       </button>
+
+      <div class="indicator"></div
     </div>
 
     <div class="grid">
@@ -249,13 +262,25 @@ function renderGrid() {
   bindTabs();
   bindReveal(filtered.length);
 }
+    const indicator = document.querySelector(".indicator");
+if (indicator) {
+  indicator.style.transform =
+    currentView === "reels" ? "translateX(50px)" : "translateX(0px)";
+}
 
 /* ---------- TAB SWITCH ---------- */
 function bindTabs() {
-  document.querySelectorAll(".tab").forEach(tab => {
+  const tabs = document.querySelectorAll(".tab");
+  const indicator = document.querySelector(".indicator");
+
+  tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => {
       currentView = tab.dataset.view;
-      visibleCount = 9;
+      visibleCount = 12;
+
+      // move indicator
+      indicator.style.transform = `translateX(${index * 50}px)`;
+
       renderGrid();
     });
   });
@@ -267,7 +292,7 @@ function bindReveal(total) {
 
   btn.addEventListener("click", () => {
     if (visibleCount < 36 && visibleCount < total) {
-      visibleCount += 9;
+      visibleCount += 12;
       renderGrid();
     }
   });
