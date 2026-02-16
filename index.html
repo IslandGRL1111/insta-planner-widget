@@ -62,8 +62,10 @@ body {
 /* ---------- TABS ---------- */
 .tabs {
   display: flex;
-  gap: 28px;
-  padding: 18px 18px 10px;
+  justify-content: center;   /* center the icons */
+  align-items: center;
+  gap: 32px;
+  padding: 18px 0 10px;
   position: relative;
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
@@ -84,7 +86,6 @@ body {
 .indicator {
   position: absolute;
   bottom: 0;
-  left: 18px;
   width: 26px;
   height: 3px;
   background: #B39DDB;
@@ -96,7 +97,7 @@ body {
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 4px;
   padding: 16px;
 }
 
@@ -198,13 +199,16 @@ async function loadWidget() {
       bindTabs();
       bindReveal(filtered.length);
 
-      const indicator = document.querySelector(".indicator");
-      if (indicator) {
-        indicator.style.transform =
-          currentView === "reels"
-            ? "translateX(50px)"
-            : "translateX(0px)";
-      }
+      const tabs = document.querySelectorAll(".tab");
+const indicator = document.querySelector(".indicator");
+
+if (indicator && tabs.length) {
+  const activeTab = document.querySelector(".tab.active");
+  const rect = activeTab.getBoundingClientRect();
+  const parentRect = activeTab.parentElement.getBoundingClientRect();
+
+  indicator.style.left = `${rect.left - parentRect.left + rect.width/2 - 13}px`;
+}
     }
 
     function bindTabs() {
