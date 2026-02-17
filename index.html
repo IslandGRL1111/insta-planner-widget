@@ -111,33 +111,13 @@ body {
 /* ---------- GRID TRANSITION ---------- */
 
 .grid.slide-left {
-  animation: slideLeft .35s ease;
+  opacity: 0;
+  transform: translateX(-12px);
 }
 
 .grid.slide-right {
-  animation: slideRight .35s ease;
-}
-
-@keyframes slideLeft {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideRight {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  opacity: 0;
+  transform: translateX(12px);
 }
   
 .cell {
