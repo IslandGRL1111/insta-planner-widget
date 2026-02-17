@@ -106,18 +106,24 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   padding: 16px 16px 8px;
+
+  transition: transform .35s cubic-bezier(.4,0,.2,1),
+              opacity .35s cubic-bezier(.4,0,.2,1);
 }
 
-/* ---------- GRID TRANSITION ---------- */
-
-.grid.slide-left {
+.grid.exiting-left {
+  transform: translateX(-40px);
   opacity: 0;
-  transform: translateX(-12px);
 }
 
-.grid.slide-right {
+.grid.exiting-right {
+  transform: translateX(40px);
   opacity: 0;
-  transform: translateX(12px);
+}
+
+.grid.entering {
+  transform: translateX(0);
+  opacity: 1;
 }
   
 .cell {
@@ -261,47 +267,34 @@ if (indicator && tabs.length) {
 
     function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
-  const indicator = document.querySelector(".indicator");
 
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
+
       if (currentView === tab.dataset.view) return;
 
       const previousView = currentView;
       currentView = tab.dataset.view;
       visibleCount = 12;
 
-      // Move indicator
-      const tabRect = tab.getBoundingClientRect();
-      const parentRect = tab.parentElement.getBoundingClientRect();
+      const oldGrid = document.querySelector(".grid");
 
-      indicator.style.transform =
-        `translateX(${tabRect.left - parentRect.left + 
-        (tabRect.width / 2 - indicator.offsetWidth / 2)}px)`;
-
-      // Decide direction BEFORE render
-      const direction =
+      // Determine direction
+      const exitClass =
         previousView === "grid" && currentView === "reels"
-          ? "slide-left"
-          : "slide-right";
+          ? "exiting-left"
+          : "exiting-right";
 
-      // Render new grid
-      renderGrid();
+      oldGrid.classList.add(exitClass);
 
-      // Apply animation AFTER render
-      const grid = document.querySelector(".grid");
-      if (grid) {
-        grid.classList.add(direction);
+      // Wait for animation to finish before re-render
+      setTimeout(() => {
+        renderGrid();
+      }, 400);
 
-        // Remove class after animation so it can replay
-        setTimeout(() => {
-          grid.classList.remove(direction);
-        }, 350);
-      }
     });
   });
 }
-
     function bindReveal(total) {
       const btn = document.getElementById("refreshBtn");
 
