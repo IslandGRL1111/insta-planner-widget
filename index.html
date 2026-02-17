@@ -62,10 +62,9 @@ body {
 /* ---------- TABS ---------- */
 .tabs {
   display: flex;
-  justify-content: center;   /* center the icons */
+  justify-content: space-between;
   align-items: center;
-  gap: 32px;
-  padding: 18px 0 10px;
+  padding: 18px 60px 12px;   /* creates the space you marked */
   position: relative;
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
@@ -76,11 +75,18 @@ body {
   padding: 0;
   cursor: pointer;
   opacity: 0.5;
-  transition: opacity .2s ease;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+  .tab img {
+  width: 30px;
+  height: 30px;
+  display: block;
 }
 
 .tab.active {
   opacity: 1;
+  transform: scale(1.08);
 }
 
 .indicator {
@@ -118,7 +124,36 @@ body {
 }
 
 .cell.pinned {
-  box-shadow: 0 0 0 2px #FFF5CD inset;
+  position: relative;
+  animation: softGlow 3s ease-in-out infinite;
+}
+
+.cell.pinned::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    #8E6B23,
+    #C9A227,
+    #F2D16B,
+    #C9A227,
+    #8E6B23
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes softGlow {
+  0% { box-shadow: 0 0 6px rgba(201,162,39,0.3); }
+  50% { box-shadow: 0 0 14px rgba(242,209,107,0.6); }
+  100% { box-shadow: 0 0 6px rgba(201,162,39,0.3); }
 }
 </style>
 </head>
