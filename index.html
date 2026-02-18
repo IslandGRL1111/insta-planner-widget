@@ -255,9 +255,9 @@ async function loadWidget() {
 
       bindTabs();
 bindReveal(filtered.length);
-
-/* --- CENTER INDICATOR AFTER RENDER --- */
-setTimeout(() => {
+      setTimeout(positionIndicator, 0);
+  
+function positionIndicator() {
   const activeTab = document.querySelector(".tab.active");
   const indicator = document.querySelector(".indicator");
 
@@ -268,7 +268,6 @@ setTimeout(() => {
     indicator.style.left =
       `${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px`;
   }
-}, 0);
 }
 
     function bindTabs() {
