@@ -256,7 +256,7 @@ function renderGrid() {
   `;
 
   bindTabs();
-  bindReveal(filtered.length);
+  bindReveal();
   moveIndicatorToActive();
  
 
@@ -307,24 +307,18 @@ function bindTabs() {
 }
 
 /* ---------- REVEAL MORE ---------- */
-function bindReveal(total) {
+function bindReveal() {
   const btn = document.getElementById("refreshBtn");
-
   if (!btn) return;
 
   btn.addEventListener("click", () => {
 
-   console.log("visibleCount:",
- visbleCount, "total:", total);
-
-    // Increase visible slots
-    if (visibleCount < 48 && visibleCount < total) {
+    if (visibleCount < 48) {
       visibleCount += 12;
       renderGrid();
       return;
     }
 
-    // If we've reached the end
     const footer = document.querySelector(".footer");
 
     footer.innerHTML = `
