@@ -98,8 +98,9 @@ body {
   width: 60px; /* longer line */
   background: #B39DDB;
   border-radius: 3px;
-  left: 0;
-  transition: left .35s
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform .35s
   cubic-bezier(.4,0,.2,1);
 }
 
@@ -256,7 +257,7 @@ function renderGrid() {
 
   bindTabs();
   bindReveal(filtered.length);
-  setTimeout(positionIndicator, 0);
+
 }
 
 /* ---------- POSITION INDICATOR ---------- */
@@ -276,8 +277,9 @@ function positionIndicator() {
 /* ---------- TAB SWITCH ---------- */
 function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
+  const indicator = document.querySelector(".indicator");
 
-  tabs.forEach(tab => {
+  tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => {
 
       if (currentView === tab.dataset.view) return;
@@ -285,6 +287,15 @@ function bindTabs() {
       const previousView = currentView;
       currentView = tab.dataset.view;
       visibleCount = 12;
+
+      // Move indicator directionally
+      const direction =
+        previousView === "grid" && currentView === "reels"
+          ? 1
+          : -1;
+
+      indicator.style.transform =
+        `translateX(calc(-50% + ${direction * 90}px))`;
 
       const oldGrid = document.querySelector(".grid");
 
