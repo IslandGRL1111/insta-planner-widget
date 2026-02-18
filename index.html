@@ -186,6 +186,9 @@ body {
 <script>
 const ACCESS_KEY = "insta_widget_access";
 
+ let currentView = "grid";
+let visibleCount = 12;
+
 /* ---------- MAIN WIDGET ---------- */
 async function loadWidget() {
   const app = document.getElementById("app");
@@ -209,8 +212,6 @@ async function loadWidget() {
       return;
     }
 
-    let currentView = "grid";
-let visibleCount = 12;
 
 const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
 
