@@ -309,27 +309,28 @@ function bindTabs() {
 function bindReveal(total) {
   const btn = document.getElementById("refreshBtn");
 
+  if (!btn) return;
+
   btn.addEventListener("click", () => {
 
+    // Increase visible slots
     if (visibleCount < 48 && visibleCount < total) {
       visibleCount += 12;
       renderGrid();
+      return;
     }
 
-    // When reaching the end
-    if (visibleCount >= total || visibleCount >= 48) {
-      const footer = document.querySelector(".footer");
+    // If we've reached the end
+    const footer = document.querySelector(".footer");
 
-      setTimeout(() => {
-        footer.classList.add("complete");
-        footer.innerHTML = `
-          <p class="end-message">
-            You’ve reached the end ✨<br/>
-            Time to create something new.
-          </p>
-        `;
-      }, 200);
-    }
+    footer.innerHTML = `
+      <div class="end-state">
+        <p class="end-message">
+          You’ve reached the end ✨<br/>
+          Time to create something new.
+        </p>
+      </div>
+    `;
   });
 }
 
