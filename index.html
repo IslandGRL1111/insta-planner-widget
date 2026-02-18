@@ -256,16 +256,31 @@ function renderGrid() {
 
   bindTabs();
   bindReveal(filtered.length);
+  moveIndicatorToActive();
  
 
 }
 
+    function moveIndicatorToActive() {
+  const activeTab = document.querySelector(".tab.active");
+  const indicator = document.querySelector(".indicator");
+
+  if (!activeTab || !indicator) return;
+
+  const tabWidth = activeTab.offsetWidth;
+  const tabOffset = activeTab.offsetLeft;
+
+  const indicatorOffset =
+    tabOffset + (tabWidth / 2) - (indicator.offsetWidth / 2);
+
+  indicator.style.transform = `translateX(${indicatorOffset}px)`;
+}
+    
 /* ---------- TAB SWITCH ---------- */
 function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
-  const indicator = document.querySelector(".indicator");
 
-  tabs.forEach((tab, index) => {
+  tabs.forEach(tab => {
     tab.addEventListener("click", () => {
 
       if (currentView === tab.dataset.view) return;
@@ -273,17 +288,6 @@ function bindTabs() {
       const previousView = currentView;
       currentView = tab.dataset.view;
       visibleCount = 12;
-
-      // Update active class
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-
-      // Move indicator using index
-      const tabWidth = tab.offsetWidth;
-      const tabOffset = tab.offsetLeft;
-      const indicatorOffset = tabOffset + (tabWidth / 2) - (indicator.offsetWidth / 2);
-
-      indicator.style.transform = `translateX(${indicatorOffset}px)`;
 
       const oldGrid = document.querySelector(".grid");
 
