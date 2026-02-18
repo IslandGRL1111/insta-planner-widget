@@ -98,8 +98,8 @@ body {
   width: 60px;
   background: #B39DDB;
   border-radius: 3px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  transform: translateX(0);
   transition: transform .35s cubic-bezier(.4,0,.2,1);
 }
 
@@ -274,15 +274,17 @@ function bindTabs() {
       currentView = tab.dataset.view;
       visibleCount = 12;
 
-      // update active state
+      // Update active class
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
 
-      // move indicator based on index
-      const offset = index === 0 ? -45 : 45;
-      indicator.style.transform = `translateX(calc(-50% + ${offset}px))`;
+      // Move indicator using index
+      const tabWidth = tab.offsetWidth;
+      const tabOffset = tab.offsetLeft;
+      const indicatorOffset = tabOffset + (tabWidth / 2) - (indicator.offsetWidth / 2);
 
-      // animate grid
+      indicator.style.transform = `translateX(${indicatorOffset}px)`;
+
       const oldGrid = document.querySelector(".grid");
 
       const exitClass =
