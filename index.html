@@ -262,14 +262,17 @@ function renderGrid() {
 }
 
 /* ---------- POSITION INDICATOR ---------- */
-function positionIndicator() {
+function moveIndicatorToActive() {
   const activeTab = document.querySelector(".tab.active");
   const indicator = document.querySelector(".indicator");
 
-  if (activeTab && indicator) {
-    const rect = activeTab.getBoundingClientRect();
-    const parentRect = activeTab.parentElement.getBoundingClientRect();
-  }
+  if (!activeTab || !indicator) return;
+
+  const rect = activeTab.getBoundingClientRect();
+  const parentRect = activeTab.parentElement.getBoundingClientRect();
+
+  indicator.style.transform =
+    `translateX(${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px)`;
 }
 
 /* ---------- TAB SWITCH ---------- */
