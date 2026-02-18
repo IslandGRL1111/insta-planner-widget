@@ -210,53 +210,56 @@ async function loadWidget() {
     }
 
     let currentView = "grid";
-    let visibleCount = 12;
+let visibleCount = 12;
 
-    const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
 
-    function renderGrid() {
+/* ---------- RENDER GRID ---------- */
+function renderGrid() {
 
-      const filtered =
-        currentView === "reels"
-          ? sorted.filter(p => p.type?.includes("Reel"))
-          : sorted;
+  const filtered =
+    currentView === "reels"
+      ? sorted.filter(p => p.type?.includes("Reel"))
+      : sorted;
 
-      const visiblePosts = filtered.slice(0, visibleCount);
+  const visiblePosts = filtered.slice(0, visibleCount);
 
-      app.innerHTML = `
-        <div class="tabs">
-          <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
-          </button>
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
+      </button>
 
-          <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
-          </button>
+      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
+      </button>
 
-          <div class="indicator"></div>
+      <div class="indicator"></div>
+    </div>
+
+    <div class="grid">
+      ${visiblePosts.map(p => `
+        <div class="cell ${p.pinned ? "pinned" : ""}">
+          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
         </div>
+      `).join("")}
 
-        <div class="grid">
-          ${visiblePosts.map(p => `
-            <div class="cell ${p.pinned ? "pinned" : ""}">
-              ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
-            </div>
-          `).join("")}
+      ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
+        .map(() => `<div class="cell"></div>`)
+        .join("")}
+    </div>
 
-          ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
-            .map(() => `<div class="cell"></div>`)
-            .join("")}
-        </div>
+    <div class="footer">
+      <button class="refresh" id="refreshBtn">Reveal More</button>
+    </div>
+  `;
 
-        <div class="footer">
-          <button class="refresh" id="refreshBtn">Reveal More</button>
-        </div>
-      `;
+  bindTabs();
+  bindReveal(filtered.length);
+  setTimeout(positionIndicator, 0);
+}
 
-      bindTabs();
-bindReveal(filtered.length);
-      setTimeout(positionIndicator, 0);
-  
+/* ---------- POSITION INDICATOR ---------- */
 function positionIndicator() {
   const activeTab = document.querySelector(".tab.active");
   const indicator = document.querySelector(".indicator");
@@ -270,7 +273,8 @@ function positionIndicator() {
   }
 }
 
-    function bindTabs() {
+/* ---------- TAB SWITCH ---------- */
+function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
 
   tabs.forEach(tab => {
@@ -294,22 +298,23 @@ function positionIndicator() {
       setTimeout(() => {
         renderGrid();
       }, 200);
-
     });
   });
 }
-    function bindReveal(total) {
-      const btn = document.getElementById("refreshBtn");
 
-      btn.addEventListener("click", () => {
-        if (visibleCount < 36 && visibleCount < total) {
-          visibleCount += 12;
-          renderGrid();
-        }
-      });
+/* ---------- REVEAL MORE ---------- */
+function bindReveal(total) {
+  const btn = document.getElementById("refreshBtn");
+
+  btn.addEventListener("click", () => {
+    if (visibleCount < 36 && visibleCount < total) {
+      visibleCount += 12;
+      renderGrid();
     }
+  });
+}
 
-    renderGrid();
+renderGrid();
 
   } catch (err) {
     app.innerHTML = `
