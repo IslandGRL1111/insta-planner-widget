@@ -98,7 +98,8 @@ body {
   width: 60px; /* longer line */
   background: #B39DDB;
   border-radius: 3px;
-  transition: transform .35s
+  left: 0;
+  transition: left .35s
   cubic-bezier(.4,0,.2,1);
 }
 
@@ -264,8 +265,8 @@ setTimeout(() => {
     const rect = activeTab.getBoundingClientRect();
     const parentRect = activeTab.parentElement.getBoundingClientRect();
 
-    indicator.style.transform =
-      `translateX(${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px)`;
+    indicator.style.left =
+      `${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px`;
   }
 }, 0);
 }
