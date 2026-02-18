@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -310,9 +310,25 @@ function bindReveal(total) {
   const btn = document.getElementById("refreshBtn");
 
   btn.addEventListener("click", () => {
-    if (visibleCount < 36 && visibleCount < total) {
+
+    if (visibleCount < 48 && visibleCount < total) {
       visibleCount += 12;
       renderGrid();
+    }
+
+    // When reaching the end
+    if (visibleCount >= total || visibleCount >= 48) {
+      const footer = document.querySelector(".footer");
+
+      setTimeout(() => {
+        footer.classList.add("complete");
+        footer.innerHTML = `
+          <p class="end-message">
+            You’ve reached the end ✨<br/>
+            Time to create something new.
+          </p>
+        `;
+      }, 200);
     }
   });
 }
