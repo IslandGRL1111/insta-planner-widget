@@ -314,6 +314,9 @@ function bindReveal(total) {
 
   btn.addEventListener("click", () => {
 
+   console.log("visibleCount:",
+ visbleCount, "total:", total);
+
     // Increase visible slots
     if (visibleCount < 48 && visibleCount < total) {
       visibleCount += 12;
