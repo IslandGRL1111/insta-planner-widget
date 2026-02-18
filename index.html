@@ -95,13 +95,12 @@ body {
   position: absolute;
   bottom: 0;
   height: 3px;
-  width: 60px; /* longer line */
+  width: 60px;
   background: #B39DDB;
   border-radius: 3px;
   left: 50%;
   transform: translateX(-50%);
-  transition: transform .35s
-  cubic-bezier(.4,0,.2,1);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
 }
 
 /* ---------- GRID ---------- */
@@ -257,29 +256,16 @@ function renderGrid() {
 
   bindTabs();
   bindReveal(filtered.length);
-  moveIndicatorToActive();
+ 
 
-}
-
-/* ---------- POSITION INDICATOR ---------- */
-function moveIndicatorToActive() {
-  const activeTab = document.querySelector(".tab.active");
-  const indicator = document.querySelector(".indicator");
-
-  if (!activeTab || !indicator) return;
-
-  const rect = activeTab.getBoundingClientRect();
-  const parentRect = activeTab.parentElement.getBoundingClientRect();
-
-  indicator.style.transform =
-    `translateX(${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px)`;
 }
 
 /* ---------- TAB SWITCH ---------- */
 function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
+  const indicator = document.querySelector(".indicator");
 
-  tabs.forEach(tab => {
+  tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => {
 
       if (currentView === tab.dataset.view) return;
@@ -288,13 +274,15 @@ function bindTabs() {
       currentView = tab.dataset.view;
       visibleCount = 12;
 
-      // Update active class immediately
+      // update active state
       tabs.forEach(t => t.classList.remove("active"));
       tab.classList.add("active");
 
-      // Move indicator immediately
-      moveIndicatorToActive();
+      // move indicator based on index
+      const offset = index === 0 ? -45 : 45;
+      indicator.style.transform = `translateX(calc(-50% + ${offset}px))`;
 
+      // animate grid
       const oldGrid = document.querySelector(".grid");
 
       const exitClass =
