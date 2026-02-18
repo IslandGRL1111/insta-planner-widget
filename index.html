@@ -257,6 +257,7 @@ function renderGrid() {
 
   bindTabs();
   bindReveal(filtered.length);
+  moveIndicatorToActive();
 
 }
 
@@ -268,18 +269,14 @@ function positionIndicator() {
   if (activeTab && indicator) {
     const rect = activeTab.getBoundingClientRect();
     const parentRect = activeTab.parentElement.getBoundingClientRect();
-
-    indicator.style.left =
-      `${rect.left - parentRect.left + rect.width / 2 - indicator.offsetWidth / 2}px`;
   }
 }
 
 /* ---------- TAB SWITCH ---------- */
 function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
-  const indicator = document.querySelector(".indicator");
 
-  tabs.forEach((tab, index) => {
+  tabs.forEach(tab => {
     tab.addEventListener("click", () => {
 
       if (currentView === tab.dataset.view) return;
@@ -288,14 +285,12 @@ function bindTabs() {
       currentView = tab.dataset.view;
       visibleCount = 12;
 
-      // Move indicator directionally
-      const direction =
-        previousView === "grid" && currentView === "reels"
-          ? 1
-          : -1;
+      // Update active class immediately
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
 
-      indicator.style.transform =
-        `translateX(calc(-50% + ${direction * 90}px))`;
+      // Move indicator immediately
+      moveIndicatorToActive();
 
       const oldGrid = document.querySelector(".grid");
 
