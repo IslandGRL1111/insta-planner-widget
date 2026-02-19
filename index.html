@@ -54,24 +54,33 @@ body {
 .refresh {
   background: #D5E7CC;
   border: none;
-  padding: 10px 26px;
+  padding: 8px 20px;              /* smaller */
   border-radius: 999px;
   cursor: pointer;
 
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
-  font-size: 20px;
-  letter-spacing: 0.5px;
+  font-size: 17px;                /* smaller */
+  letter-spacing: 0.4px;
+  color: #4E4E4E;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.refresh:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
  .end-message {
-  color: #5F5F5F
   font-family: 'Cormorant Garamond', serif;
-  font-weight: 400;
+  font-weight: 300;
   font-style: italic;
-  font-size: 22px;
-  line-height: 1.5;
-  letter-spacing: 0.5px;
+  font-size: 18px;           /* smaller */
+  line-height: 1.6;
+  letter-spacing: 0.3px;
+  color: #7A7A7A;            /* softer grey */
+  text-align: center;
+  margin: 8px 0 4px;
 }
 
 /* ---------- TABS ---------- */
