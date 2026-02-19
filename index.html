@@ -212,6 +212,7 @@ body {
 let currentView = "grid";
 let visibleCount = 12;
 let sorted = [];
+
 const app = document.getElementById("app");
 
 /* ---------- LOAD WIDGET ---------- */
@@ -226,7 +227,6 @@ async function loadWidget() {
   try {
     const res = await fetch("/api/notion");
     const data = await res.json();
-   console.log("DATA:", data);
 
     if (!data || !data.length) {
       app.innerHTML = `
@@ -239,7 +239,8 @@ async function loadWidget() {
 
     sorted = [...data].sort((a,b) => b.pinned - a.pinned);
 
-    renderGrid();
+    buildStaticLayout();
+    updateGrid();
 
   } catch (err) {
     app.innerHTML = `
@@ -251,42 +252,23 @@ async function loadWidget() {
 }
 
 
-/* ---------- RENDER GRID ---------- */
-function renderGrid() {
-
-  const filtered =
-    currentView === "reels"
-      ? sorted.filter(p => p.type?.includes("Reel"))
-      : sorted;
-
-  const visiblePosts = filtered.slice(0, visibleCount);
+/* ---------- BUILD STATIC LAYOUT ONCE ---------- */
+function buildStaticLayout() {
 
   app.innerHTML = `
     <div class="tabs">
-      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+      <button class="tab active" data-view="grid">
         <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
       </button>
 
-      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+      <button class="tab" data-view="reels">
         <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
       </button>
 
       <div class="indicator"></div>
     </div>
 
-    <div class="grid">
-      ${visiblePosts.map(p => `
-        <div class="cell">
-          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
-        </div>
-      `).join("")}
-
-      ${Array.from({
-        length: Math.max(0, visibleCount - visiblePosts.length)
-      })
-        .map(() => `<div class="cell"></div>`)
-        .join("")}
-    </div>
+    <div class="grid" id="grid"></div>
 
     <div class="footer">
       <button class="refresh" id="refreshBtn">Reveal More</button>
@@ -310,15 +292,67 @@ function renderGrid() {
   `;
 
   bindTabs();
-  bindReveal(filtered.length);
-  moveIndicatorToActive();
+  bindReveal();
+  moveIndicator();
+}
+
+
+/* ---------- UPDATE GRID ONLY ---------- */
+function updateGrid() {
+
+  const grid = document.getElementById("grid");
+
+  const filtered =
+    currentView === "reels"
+      ? sorted.filter(p => p.type?.includes("Reel"))
+      : sorted;
+
+  const visiblePosts = filtered.slice(0, visibleCount);
+
+  grid.innerHTML = `
+    ${visiblePosts.map(p => `
+      <div class="cell">
+        ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
+      </div>
+    `).join("")}
+
+    ${Array.from({
+      length: Math.max(0, visibleCount - visiblePosts.length)
+    })
+      .map(() => `<div class="cell"></div>`)
+      .join("")}
+  `;
+}
+
+
+/* ---------- TABS ---------- */
+function bindTabs() {
+
+  const tabs = document.querySelectorAll(".tab");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+
+      if (currentView === tab.dataset.view) return;
+
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      currentView = tab.dataset.view;
+      visibleCount = 12;
+
+      moveIndicator();
+      updateGrid();
+    });
+  });
 }
 
 
 /* ---------- INDICATOR ---------- */
-function moveIndicatorToActive() {
+function moveIndicator() {
   const activeTab = document.querySelector(".tab.active");
   const indicator = document.querySelector(".indicator");
+
   if (!activeTab || !indicator) return;
 
   const offset =
@@ -330,43 +364,20 @@ function moveIndicatorToActive() {
 }
 
 
-/* ---------- TAB SWITCH ---------- */
-function bindTabs() {
-  const tabs = document.querySelectorAll(".tab");
-
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-
-      if (currentView === tab.dataset.view) return;
-
-      const previousView = currentView;
-      currentView = tab.dataset.view;
-      visibleCount = 12;
-
-      const oldGrid = document.querySelector(".grid");
-
-      oldGrid.classList.add(
-        previousView === "grid"
-          ? "exiting-left"
-          : "exiting-right"
-      );
-
-      setTimeout(renderGrid, 200);
-    });
-  });
-}
-
-
 /* ---------- REVEAL ---------- */
-function bindReveal(total) {
+function bindReveal() {
+
   const btn = document.getElementById("refreshBtn");
   const loader = document.getElementById("refreshLoader");
 
-  if (!btn || !loader) return;
-
   btn.addEventListener("click", () => {
 
-    if (visibleCount >= 48 || visibleCount >= total) {
+    const filtered =
+      currentView === "reels"
+        ? sorted.filter(p => p.type?.includes("Reel"))
+        : sorted;
+
+    if (visibleCount >= 48 || visibleCount >= filtered.length) {
       showEndState();
       return;
     }
@@ -378,13 +389,13 @@ function bindReveal(total) {
       visibleCount += 12;
       loader.classList.remove("active");
       btn.disabled = false;
-      renderGrid();
+      updateGrid();
     }, 900);
   });
 }
 
 
-/* ---------- END STATE ---------- */
+/* ---------- END ---------- */
 function showEndState() {
   const footer = document.querySelector(".footer");
 
