@@ -226,6 +226,7 @@ async function loadWidget() {
   try {
     const res = await fetch("/api/notion");
     const data = await res.json();
+   console.log("DATA:", data);
 
     if (!data || !data.length) {
       app.innerHTML = `
