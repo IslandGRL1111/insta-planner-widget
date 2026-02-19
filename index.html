@@ -211,6 +211,7 @@ body {
 
 let currentView = "grid";
 let visibleCount = 12;
+let sorted = [];
 
 /* ---------- MAIN ---------- */
 
@@ -227,7 +228,7 @@ async function loadWidget() {
     const res = await fetch("/api/notion");
     const data = await res.json();
 
-    const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+    sorted = [...data].sort((a,b) => b.pinned - a.pinned);
 
     function renderGrid() {
 
@@ -281,6 +282,7 @@ async function loadWidget() {
 
       bindTabs();
       bindReveal(filtered.length);
+      moveIndicatorToActive();
       
     }
 
@@ -335,20 +337,17 @@ async function loadWidget() {
       return;
     }
 
-    loader.classList.add("active");
     btn.disabled = true;
+    loader.classList.add("active");
 
     setTimeout(() => {
       visibleCount += 12;
-
       loader.classList.remove("active");
       btn.disabled = false;
-
       renderGrid();
     }, 900);
   });
 }
-
    function showEndState() {
   const footer = document.querySelector(".footer");
 
