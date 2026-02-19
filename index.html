@@ -93,6 +93,25 @@ body {
   opacity: 0.9;
 }
 
+ .refresh-loader {
+  font-size: 18px;
+  margin-top: 8px;
+  opacity: 0;
+  transform: rotate(0deg);
+  transition: opacity .3s ease;
+  color: #8F8F8F;
+}
+
+.refresh-loader.active {
+  opacity: 1;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
  .end-message {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
@@ -297,8 +316,14 @@ function renderGrid() {
     </div>
 
     <div class="footer">
-      <button class="refresh" id="refreshBtn">Reveal More</button>
-    </div>
+  <button class="refresh" id="refreshBtn">
+    Reveal More
+  </button>
+
+  <div class="refresh-loader" id="refreshLoader">
+    ⟳
+  </div>
+</div>
   `;
 
   bindTabs();
@@ -353,25 +378,42 @@ function bindTabs() {
 }
 
 /* ---------- REVEAL MORE ---------- */
-function bindReveal() {
+function bindReveal(total) {
   const btn = document.getElementById("refreshBtn");
+  const loader = document.getElementById("refreshLoader");
+
   if (!btn) return;
 
   btn.addEventListener("click", () => {
 
-    if (visibleCount < 48) {
-      visibleCount += 12;
-      renderGrid();
+    if (visibleCount < 48 && visibleCount < total) {
+
+      // Disable button during "loading"
+      btn.disabled = true;
+
+      // Show rotating loader
+      loader.classList.add("active");
+
+      // Pause before revealing
+      setTimeout(() => {
+        visibleCount += 12;
+
+        loader.classList.remove("active");
+        btn.disabled = false;
+
+        renderGrid();
+      }, 1200); // 👈 mystery timing (adjust 900–1500ms to taste)
+
       return;
     }
 
+    // End state
     const footer = document.querySelector(".footer");
-
     footer.innerHTML = `
       <div class="end-state">
         <p class="end-message">
           You’ve reached the end ✨<br/>
-          Time to create something new🎨
+          Time to create something new 🪩
         </p>
       </div>
     `;
