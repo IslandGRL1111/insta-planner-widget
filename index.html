@@ -86,12 +86,12 @@ body {
 .refresh-loader {
   width: 32px;
   height: 32px;
-  margin: 10px auto 0;
+  margin: 6px auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  color: #8F8F8F;
+  color: #545454;
 }
 
 .refresh-loader svg {
@@ -328,34 +328,34 @@ async function loadWidget() {
     }
 
     function bindReveal() {
-      const btn = document.getElementById("refreshBtn");
-      const loader = document.getElementById("refreshLoader");
+  const btn = document.getElementById("refreshBtn");
+  const loader = document.getElementById("refreshLoader");
 
-      if (!btn || !loader) return;
+  if (!btn || !loader) return;
 
-      btn.addEventListener("click", () => {
+  btn.addEventListener("click", () => {
 
-        btn.disabled = true;
-        loader.classList.add("active");
+    if (visibleCount >= 48) return;
 
-        setTimeout(() => {
+    // show loader
+    loader.classList.add("active");
+    btn.style.opacity = "0.6";
+    btn.style.pointerEvents = "none";
 
-          if (visibleCount < 48) {
-            visibleCount += 12;
-            renderGrid();
-            return;
-          }
+    setTimeout(() => {
 
-          document.querySelector(".footer").innerHTML = `
-            <p class="end-message">
-              You’ve reached the end ✨<br/>
-              Time to create something new 🪩
-            </p>
-          `;
+      visibleCount += 12;
 
-        }, 900);
-      });
-    }
+      loader.classList.remove("active");
+
+      btn.style.opacity = "1";
+      btn.style.pointerEvents = "auto";
+
+      renderGrid();
+
+    }, 900);
+  });
+}
 
     renderGrid();
 
