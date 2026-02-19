@@ -80,18 +80,18 @@ body {
 /* ---------- REFRESH LOADER ---------- */
 
 .refresh-loader {
-  font-size: 28px;              /* bigger + visible */
-  margin-top: 12px;
+  margin-top: 14px;
   opacity: 0;
-  transform: scale(.8);
+  transform: scale(.85);
   transition: opacity .3s ease, transform .3s ease;
-  color: #B39DDB;
+  color: #C9ABD8; /* softer luxe grey */
+  display: inline-block;
 }
 
 .refresh-loader.active {
   opacity: 1;
   transform: scale(1);
-  animation: spin .9s linear infinite;
+  animation: spin 3s linear infinite; /* 👈 3s elegant rotation */
 }
 
 @keyframes spin {
@@ -252,7 +252,14 @@ async function loadWidget() {
 
         <div class="footer">
           <button class="refresh" id="refreshBtn">Reveal More</button>
-          <div class="refresh-loader" id="refreshLoader">⟳</div>
+          <div class="refresh-loader" id="refreshLoader">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 2v6h-6"/>
+    <path d="M3 22v-6h6"/>
+    <path d="M21 8a9 9 0 0 0-15-5.5L3 8"/>
+    <path d="M3 16a9 9 0 0 0 15 5.5L21 16"/>
+  </svg>
+</div>
         </div>
       `;
 
