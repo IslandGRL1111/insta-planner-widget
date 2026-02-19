@@ -232,102 +232,111 @@ async function loadWidget() {
 
     function renderGrid() {
 
-      const filtered =
-        currentView === "reels"
-          ? sorted.filter(p => p.type?.includes("Reel"))
-          : sorted;
+  const filtered =
+    currentView === "reels"
+      ? sorted.filter(p => p.type?.includes("Reel"))
+      : sorted;
 
-      const visiblePosts = filtered.slice(0, visibleCount);
-     
-     console.log("visibleCount:", visibleCount);
-     console.log("visiblePosts:", visiblePosts.length);
+  const visiblePosts = filtered.slice(0, visibleCount);
 
-      app.innerHTML = `
-        <div class="tabs">
-          <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
-          </button>
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
+      </button>
 
-          <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
-            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
-          </button>
+      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
+      </button>
 
-          <div class="indicator"></div>
+      <div class="indicator"></div>
+    </div>
+
+    <div class="grid">
+      ${visiblePosts.map(p => `
+        <div class="cell">
+          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
         </div>
+      `).join("")}
 
-        <div class="grid">
-          ${visiblePosts.map(p => `
-            <div class="cell">
-              ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
-            </div>
-          `).join("")}
-        </div>
+      ${Array.from({
+        length: Math.max(0, visibleCount - visiblePosts.length)
+      })
+        .map(() => `<div class="cell"></div>`)
+        .join("")}
+    </div>
 
-        <div class="footer">
-          <button class="refresh" id="refreshBtn">Reveal More</button>
-          <div class="refresh-loader" id="refreshLoader">
-  <svg viewBox="-2 -2 28 28"
-     width="20"
-     height="20"
-     fill="none"
-     stroke="currentColor"
-     stroke-width="2"
-     stroke-linecap="round"
-     stroke-linejoin="round">
-    <path d="M21 2v6h-6"/>
-    <path d="M3 22v-6h6"/>
-    <path d="M21 8a9 9 0 0 0-15-5.5L3 8"/>
-    <path d="M3 16a9 9 0 0 0 15 5.5L21 16"/>
-  </svg>
-</div>
-        </div>
-      `;
+    <div class="footer">
+      <button class="refresh" id="refreshBtn">
+        Reveal More
+      </button>
 
-      bindTabs();
-      bindReveal(filtered.length);
-      moveIndicatorToActive();
-      
-    }
+      <div class="refresh-loader" id="refreshLoader">
+        <svg viewBox="-2 -2 28 28"
+             width="20"
+             height="20"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M21 2v6h-6"/>
+          <path d="M3 22v-6h6"/>
+          <path d="M21 8a9 9 0 0 0-15-5.5L3 8"/>
+          <path d="M3 16a9 9 0 0 0 15 5.5L21 16"/>
+        </svg>
+      </div>
+    </div>
+  `;
 
-    function moveIndicatorToActive() {
-      const activeTab = document.querySelector(".tab.active");
-      const indicator = document.querySelector(".indicator");
-      if (!activeTab || !indicator) return;
+  bindTabs();
+  bindReveal(filtered.length);
+  moveIndicatorToActive();
+}
 
-      const offset =
-        activeTab.offsetLeft +
-        (activeTab.offsetWidth / 2) -
-        (indicator.offsetWidth / 2);
 
-      indicator.style.transform = `translateX(${offset}px)`;
-    }
+function moveIndicatorToActive() {
+  const activeTab = document.querySelector(".tab.active");
+  const indicator = document.querySelector(".indicator");
 
-    function bindTabs() {
-      const tabs = document.querySelectorAll(".tab");
+  if (!activeTab || !indicator) return;
 
-      tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
+  const offset =
+    activeTab.offsetLeft +
+    (activeTab.offsetWidth / 2) -
+    (indicator.offsetWidth / 2);
 
-          if (currentView === tab.dataset.view) return;
+  indicator.style.transform = `translateX(${offset}px)`;
+}
 
-          const previousView = currentView;
-          currentView = tab.dataset.view;
-          visibleCount = 12;
 
-          const oldGrid = document.querySelector(".grid");
+function bindTabs() {
+  const tabs = document.querySelectorAll(".tab");
 
-          oldGrid.classList.add(
-            previousView === "grid"
-              ? "exiting-left"
-              : "exiting-right"
-          );
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
 
-          setTimeout(renderGrid, 200);
-        });
-      });
-    }
+      if (currentView === tab.dataset.view) return;
 
-    function bindReveal(total) {
+      const previousView = currentView;
+      currentView = tab.dataset.view;
+      visibleCount = 12;
+
+      const oldGrid = document.querySelector(".grid");
+
+      oldGrid.classList.add(
+        previousView === "grid"
+          ? "exiting-left"
+          : "exiting-right"
+      );
+
+      setTimeout(renderGrid, 200);
+    });
+  });
+}
+
+
+function bindReveal(total) {
   const btn = document.getElementById("refreshBtn");
   const loader = document.getElementById("refreshLoader");
 
@@ -351,7 +360,9 @@ async function loadWidget() {
     }, 900);
   });
 }
-   function showEndState() {
+
+
+function showEndState() {
   const footer = document.querySelector(".footer");
 
   footer.innerHTML = `
@@ -364,7 +375,8 @@ async function loadWidget() {
   `;
 }
 
-    renderGrid();
+
+renderGrid();
 
   } catch (err) {
     app.innerHTML = `<div class="center"><strong>Couldn’t load posts 😭</strong></div>`;
