@@ -378,45 +378,43 @@ function bindTabs() {
 }
 
 /* ---------- REVEAL MORE ---------- */
-function bindReveal(total) {
+function bindReveal() {
   const btn = document.getElementById("refreshBtn");
   const loader = document.getElementById("refreshLoader");
 
-  if (!btn) return;
+  if (!btn || !loader) return;
 
   btn.addEventListener("click", () => {
 
-    if (visibleCount < 48 && visibleCount < total) {
+    // Prevent double click chaos
+    btn.disabled = true;
 
-      // Disable button during "loading"
-      btn.disabled = true;
+    // Show loader
+    loader.classList.add("active");
 
-      // Show rotating loader
-      loader.classList.add("active");
+    // Small intentional pause
+    setTimeout(() => {
 
-      // Pause before revealing
-      setTimeout(() => {
+      if (visibleCount < 48) {
         visibleCount += 12;
 
-        loader.classList.remove("active");
-        btn.disabled = false;
+        renderGrid(); // re-render after pause
+        return;
+      }
 
-        renderGrid();
-      }, 1200); // 👈 mystery timing (adjust 900–1500ms to taste)
+      // If we've reached the end
+      const footer = document.querySelector(".footer");
 
-      return;
-    }
+      footer.innerHTML = `
+        <div class="end-state">
+          <p class="end-message">
+            You’ve reached the end ✨<br/>
+            Time to create something new 🎨
+          </p>
+        </div>
+      `;
 
-    // End state
-    const footer = document.querySelector(".footer");
-    footer.innerHTML = `
-      <div class="end-state">
-        <p class="end-message">
-          You’ve reached the end ✨<br/>
-          Time to create something new 🪩
-        </p>
-      </div>
-    `;
+    }, 900); // ← adjust timing here (700–1100 feels good)
   });
 }
 
