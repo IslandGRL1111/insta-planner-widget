@@ -84,14 +84,14 @@ body {
 /* ---------- REFRESH LOADER ---------- */
 
 .refresh-loader {
-  width: 24px;              /* slightly smaller */
-  height: 24px;
-  opacity: 0;
+  width: 28px;              /* give it real space */
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 6px;
-  color: #A28FAD;
+  opacity: 0;
+  overflow: visible;        /* 👈 important */
+  color: #8F8F8F;
 }
 
 .refresh-loader svg {
@@ -101,6 +101,7 @@ body {
 
 .refresh-loader.active {
   opacity: 1;
+  animation: spin 2.4s cubic-bezier(.45,.05,.55,.95) infinite;
 }
 
 .refresh-loader.active svg {
@@ -266,7 +267,12 @@ async function loadWidget() {
         <div class="footer">
           <button class="refresh" id="refreshBtn">Reveal More</button>
           <div class="refresh-loader" id="refreshLoader">
-  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+  <svg viewBox="0 0 24 24" width="20" height="20"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round">
     <path d="M21 2v6h-6"/>
     <path d="M3 22v-6h6"/>
     <path d="M21 8a9 9 0 0 0-15-5.5L3 8"/>
