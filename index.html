@@ -39,6 +39,10 @@ body {
 .footer {
   padding: 18px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 /* ---------- REVEAL BUTTON ---------- */
@@ -80,18 +84,27 @@ body {
 /* ---------- REFRESH LOADER ---------- */
 
 .refresh-loader {
-  margin-top: 14px;
+  width: 28px;
+  height: 28px;
   opacity: 0;
-  transform: scale(.85);
-  transition: opacity .3s ease, transform .3s ease;
-  color: #C9ABD8; /* softer luxe grey */
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8F8F8F;
+
+  transform: scale(0.8);
+  transition: opacity .2.2s ease, transform .2.2s ease;
+}
+
+.refresh-loader svg {
+  width: 22px;
+  height: 22px;
 }
 
 .refresh-loader.active {
   opacity: 1;
   transform: scale(1);
-  animation: spin 3s linear infinite; /* 👈 3s elegant rotation */
+  animation: spin 2.2s linear infinite; /* elegant slower rotation */
 }
 
 @keyframes spin {
