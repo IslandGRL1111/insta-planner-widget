@@ -372,15 +372,10 @@ function bindReveal() {
 
   btn.addEventListener("click", () => {
 
-    const filtered =
-      currentView === "reels"
-        ? sorted.filter(p => p.type?.includes("Reel"))
-        : sorted;
-
-    if (visibleCount >= 48 || visibleCount >= filtered.length) {
-      showEndState();
-      return;
-    }
+    if (visibleCount >= 48) {
+  showEndState();
+  return;
+}
 
     btn.disabled = true;
     loader.classList.add("active");
