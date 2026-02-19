@@ -84,13 +84,13 @@ body {
 /* ---------- REFRESH LOADER ---------- */
 
 .refresh-loader {
-  width: 28px;              /* give it real space */
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  margin: 10px auto 0;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  overflow: visible;        /* 👈 important */
   color: #8F8F8F;
 }
 
@@ -267,7 +267,9 @@ async function loadWidget() {
         <div class="footer">
           <button class="refresh" id="refreshBtn">Reveal More</button>
           <div class="refresh-loader" id="refreshLoader">
-  <svg viewBox="0 0 24 24" width="20" height="20"
+  <svg viewBox="-2 -2 28 28"
+     width="20"
+     height="20"
      fill="none"
      stroke="currentColor"
      stroke-width="2"
