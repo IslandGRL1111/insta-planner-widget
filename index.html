@@ -36,20 +36,12 @@ body {
   gap: 14px;
 }
 
-.unlock {
-  background: #E6DBFF;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 999px;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 190px;
-}
-
 .footer {
   padding: 18px;
   text-align: center;
 }
+
+/* ---------- REVEAL BUTTON ---------- */
 
 .refresh {
   background: #D5E7CC;
@@ -57,17 +49,16 @@ body {
   padding: 8px 20px;
   border-radius: 999px;
   cursor: pointer;
-
   font-family: 'Cormorant Garamond', serif;
   font-weight: 400;
   font-size: 16px;
+  transition: transform .18s ease, box-shadow .25s ease, opacity .25s ease;
+  animation: softPulse 4s ease-in-out infinite;
+}
 
-  transition: 
-    transform .18s ease,
-    box-shadow .25s ease,
-    background .25s ease;
-
-  animation: softPulse 4s ease-in-out infinite; /* 👈 add this line here */
+.refresh:disabled {
+  opacity: .6;
+  cursor: default;
 }
 
 @keyframes softPulse {
@@ -76,35 +67,31 @@ body {
   100% { box-shadow: 0 0 0 rgba(213,231,204,0.0); }
 }
 
-/* Hover lift (desktop only feel) */
 .refresh:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
-/* Click press */
 .refresh:active {
   transform: scale(0.96);
   box-shadow: inset 0 3px 8px rgba(0,0,0,0.12);
 }
 
-.refresh:hover {
-  transform: translateY(-1px);
-  opacity: 0.9;
-}
+/* ---------- REFRESH LOADER ---------- */
 
- .refresh-loader {
-  font-size: 18px;
-  margin-top: 8px;
+.refresh-loader {
+  font-size: 28px;              /* bigger + visible */
+  margin-top: 12px;
   opacity: 0;
-  transform: rotate(0deg);
-  transition: opacity .3s ease;
-  color: #8F8F8F;
+  transform: scale(.8);
+  transition: opacity .3s ease, transform .3s ease;
+  color: #B39DDB;
 }
 
 .refresh-loader.active {
   opacity: 1;
-  animation: spin 1s linear infinite;
+  transform: scale(1);
+  animation: spin .9s linear infinite;
 }
 
 @keyframes spin {
@@ -112,28 +99,30 @@ body {
   to   { transform: rotate(360deg); }
 }
 
- .end-message {
+/* ---------- END MESSAGE ---------- */
+
+.end-message {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
   font-style: italic;
-  font-size: 18px;           /* smaller */
+  font-size: 18px;
   line-height: 1.6;
   letter-spacing: 0.3px;
-  color: #7A7A7A;            /* softer grey */
+  color: #7A7A7A;
   text-align: center;
   margin: 8px 0 4px;
 }
 
 /* ---------- TABS ---------- */
+
 .tabs {
   display: flex;
-  justify-content: center;   /* center the icons */
+  justify-content: center;
   align-items: center;
-  gap: 90px;                 /* adjust this to control spacing */
+  gap: 90px;
   padding: 18px 0 10px;
   position: relative;
   border-bottom: 1px solid rgba(0,0,0,0.05);
-  overflow: visible;
 }
 
 .tab {
@@ -150,12 +139,12 @@ body {
 }
 
 .tab img {
-  width: 32px; /* bigger icons */
-  height: auto;
+  width: 32px;
   display: block;
 }
 
 /* Indicator */
+
 .indicator {
   position: absolute;
   bottom: 0;
@@ -169,12 +158,12 @@ body {
 }
 
 /* ---------- GRID ---------- */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   padding: 16px 16px 8px;
-
   transition: transform .35s cubic-bezier(.4,0,.2,1),
               opacity .35s cubic-bezier(.4,0,.2,1);
 }
@@ -189,11 +178,6 @@ body {
   opacity: 0;
 }
 
-.grid.entering {
-  transform: translateX(0);
-  opacity: 1;
-}
-  
 .cell {
   position: relative;
   aspect-ratio: 4 / 5;
@@ -206,42 +190,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  display: block;
 }
 
-.cell.pinned {
-  position: relative;
-  animation: softGlow 3s ease-in-out infinite;
-}
-
-.cell.pinned::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 10px;
-  padding: 2px;
-  background: linear-gradient(
-    135deg,
-    #8E6B23,
-    #C9A227,
-    #F2D16B,
-    #C9A227,
-    #8E6B23
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-@keyframes softGlow {
-  0% { box-shadow: 0 0 6px rgba(201,162,39,0.3); }
-  50% { box-shadow: 0 0 14px rgba(242,209,107,0.6); }
-  100% { box-shadow: 0 0 6px rgba(201,162,39,0.3); }
-}
 </style>
 </head>
 
@@ -249,12 +199,12 @@ body {
 <div class="app" id="app"></div>
 
 <script>
-const ACCESS_KEY = "insta_widget_access";
 
- let currentView = "grid";
+let currentView = "grid";
 let visibleCount = 12;
 
-/* ---------- MAIN WIDGET ---------- */
+/* ---------- MAIN ---------- */
+
 async function loadWidget() {
   const app = document.getElementById("app");
 
@@ -268,169 +218,126 @@ async function loadWidget() {
     const res = await fetch("/api/notion");
     const data = await res.json();
 
-    if (!data || !data.length) {
+    const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+
+    function renderGrid() {
+
+      const filtered =
+        currentView === "reels"
+          ? sorted.filter(p => p.type?.includes("Reel"))
+          : sorted;
+
+      const visiblePosts = filtered.slice(0, visibleCount);
+
       app.innerHTML = `
-        <div class="center">
-          <strong>No scheduled Instagram posts yet 🌿</strong>
+        <div class="tabs">
+          <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
+            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
+          </button>
+
+          <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
+            <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
+          </button>
+
+          <div class="indicator"></div>
+        </div>
+
+        <div class="grid">
+          ${visiblePosts.map(p => `
+            <div class="cell">
+              ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="footer">
+          <button class="refresh" id="refreshBtn">Reveal More</button>
+          <div class="refresh-loader" id="refreshLoader">⟳</div>
         </div>
       `;
-      return;
+
+      bindTabs();
+      bindReveal();
+      moveIndicatorToActive();
     }
 
-
-const sorted = [...data].sort((a,b) => b.pinned - a.pinned);
-
-/* ---------- RENDER GRID ---------- */
-function renderGrid() {
-
-  const filtered =
-    currentView === "reels"
-      ? sorted.filter(p => p.type?.includes("Reel"))
-      : sorted;
-
-  const visiblePosts = filtered.slice(0, visibleCount);
-
-  app.innerHTML = `
-    <div class="tabs">
-      <button class="tab ${currentView==="grid"?"active":""}" data-view="grid">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" width="22" />
-      </button>
-
-      <button class="tab ${currentView==="reels"?"active":""}" data-view="reels">
-        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" width="22" />
-      </button>
-
-      <div class="indicator"></div>
-    </div>
-
-    <div class="grid">
-      ${visiblePosts.map(p => `
-        <div class="cell ${p.pinned ? "pinned" : ""}">
-          ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
-        </div>
-      `).join("")}
-
-      ${Array.from({length: Math.max(0, visibleCount - visiblePosts.length)})
-        .map(() => `<div class="cell"></div>`)
-        .join("")}
-    </div>
-
-    <div class="footer">
-  <button class="refresh" id="refreshBtn">
-    Reveal More
-  </button>
-
-  <div class="refresh-loader" id="refreshLoader">
-    ⟳
-  </div>
-</div>
-  `;
-
-  bindTabs();
-  bindReveal();
-  moveIndicatorToActive();
- 
-
-}
-
     function moveIndicatorToActive() {
-  const activeTab = document.querySelector(".tab.active");
-  const indicator = document.querySelector(".indicator");
+      const activeTab = document.querySelector(".tab.active");
+      const indicator = document.querySelector(".indicator");
+      if (!activeTab || !indicator) return;
 
-  if (!activeTab || !indicator) return;
+      const offset =
+        activeTab.offsetLeft +
+        (activeTab.offsetWidth / 2) -
+        (indicator.offsetWidth / 2);
 
-  const tabWidth = activeTab.offsetWidth;
-  const tabOffset = activeTab.offsetLeft;
+      indicator.style.transform = `translateX(${offset}px)`;
+    }
 
-  const indicatorOffset =
-    tabOffset + (tabWidth / 2) - (indicator.offsetWidth / 2);
+    function bindTabs() {
+      const tabs = document.querySelectorAll(".tab");
 
-  indicator.style.transform = `translateX(${indicatorOffset}px)`;
-}
-    
-/* ---------- TAB SWITCH ---------- */
-function bindTabs() {
-  const tabs = document.querySelectorAll(".tab");
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
+          if (currentView === tab.dataset.view) return;
 
-      if (currentView === tab.dataset.view) return;
+          const previousView = currentView;
+          currentView = tab.dataset.view;
+          visibleCount = 12;
 
-      const previousView = currentView;
-      currentView = tab.dataset.view;
-      visibleCount = 12;
+          const oldGrid = document.querySelector(".grid");
 
-      const oldGrid = document.querySelector(".grid");
+          oldGrid.classList.add(
+            previousView === "grid"
+              ? "exiting-left"
+              : "exiting-right"
+          );
 
-      const exitClass =
-        previousView === "grid" && currentView === "reels"
-          ? "exiting-left"
-          : "exiting-right";
+          setTimeout(renderGrid, 200);
+        });
+      });
+    }
 
-      oldGrid.classList.add(exitClass);
+    function bindReveal() {
+      const btn = document.getElementById("refreshBtn");
+      const loader = document.getElementById("refreshLoader");
 
-      setTimeout(() => {
-        renderGrid();
-      }, 200);
-    });
-  });
-}
+      if (!btn || !loader) return;
 
-/* ---------- REVEAL MORE ---------- */
-function bindReveal() {
-  const btn = document.getElementById("refreshBtn");
-  const loader = document.getElementById("refreshLoader");
+      btn.addEventListener("click", () => {
 
-  if (!btn || !loader) return;
+        btn.disabled = true;
+        loader.classList.add("active");
 
-  btn.addEventListener("click", () => {
+        setTimeout(() => {
 
-    // Prevent double click chaos
-    btn.disabled = true;
+          if (visibleCount < 48) {
+            visibleCount += 12;
+            renderGrid();
+            return;
+          }
 
-    // Show loader
-    loader.classList.add("active");
+          document.querySelector(".footer").innerHTML = `
+            <p class="end-message">
+              You’ve reached the end ✨<br/>
+              Time to create something new 🪩
+            </p>
+          `;
 
-    // Small intentional pause
-    setTimeout(() => {
+        }, 900);
+      });
+    }
 
-      if (visibleCount < 48) {
-        visibleCount += 12;
-
-        renderGrid(); // re-render after pause
-        return;
-      }
-
-      // If we've reached the end
-      const footer = document.querySelector(".footer");
-
-      footer.innerHTML = `
-        <div class="end-state">
-          <p class="end-message">
-            You’ve reached the end ✨<br/>
-            Time to create something new 🎨
-          </p>
-        </div>
-      `;
-
-    }, 900); // ← adjust timing here (700–1100 feels good)
-  });
-}
-
-renderGrid();
+    renderGrid();
 
   } catch (err) {
-    app.innerHTML = `
-      <div class="center">
-        <strong>Couldn’t load posts 😭</strong>
-      </div>
-    `;
+    app.innerHTML = `<div class="center"><strong>Couldn’t load posts 😭</strong></div>`;
   }
 }
 
-/* ---------- BOOT ---------- */
 loadWidget();
+
 </script>
 
 </body>
