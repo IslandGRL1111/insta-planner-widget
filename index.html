@@ -212,11 +212,10 @@ body {
 let currentView = "grid";
 let visibleCount = 12;
 let sorted = [];
+const app = document.getElementById("app");
 
-/* ---------- MAIN ---------- */
-
+/* ---------- LOAD WIDGET ---------- */
 async function loadWidget() {
-  const app = document.getElementById("app");
 
   app.innerHTML = `
     <div class="center">
@@ -228,9 +227,31 @@ async function loadWidget() {
     const res = await fetch("/api/notion");
     const data = await res.json();
 
+    if (!data || !data.length) {
+      app.innerHTML = `
+        <div class="center">
+          <strong>No scheduled Instagram posts yet 🌿</strong>
+        </div>
+      `;
+      return;
+    }
+
     sorted = [...data].sort((a,b) => b.pinned - a.pinned);
 
-    function renderGrid() {
+    renderGrid();
+
+  } catch (err) {
+    app.innerHTML = `
+      <div class="center">
+        <strong>Couldn’t load posts 😭</strong>
+      </div>
+    `;
+  }
+}
+
+
+/* ---------- RENDER GRID ---------- */
+function renderGrid() {
 
   const filtered =
     currentView === "reels"
@@ -267,9 +288,7 @@ async function loadWidget() {
     </div>
 
     <div class="footer">
-      <button class="refresh" id="refreshBtn">
-        Reveal More
-      </button>
+      <button class="refresh" id="refreshBtn">Reveal More</button>
 
       <div class="refresh-loader" id="refreshLoader">
         <svg viewBox="-2 -2 28 28"
@@ -295,10 +314,10 @@ async function loadWidget() {
 }
 
 
+/* ---------- INDICATOR ---------- */
 function moveIndicatorToActive() {
   const activeTab = document.querySelector(".tab.active");
   const indicator = document.querySelector(".indicator");
-
   if (!activeTab || !indicator) return;
 
   const offset =
@@ -310,6 +329,7 @@ function moveIndicatorToActive() {
 }
 
 
+/* ---------- TAB SWITCH ---------- */
 function bindTabs() {
   const tabs = document.querySelectorAll(".tab");
 
@@ -336,6 +356,7 @@ function bindTabs() {
 }
 
 
+/* ---------- REVEAL ---------- */
 function bindReveal(total) {
   const btn = document.getElementById("refreshBtn");
   const loader = document.getElementById("refreshLoader");
@@ -362,6 +383,7 @@ function bindReveal(total) {
 }
 
 
+/* ---------- END STATE ---------- */
 function showEndState() {
   const footer = document.querySelector(".footer");
 
@@ -376,13 +398,7 @@ function showEndState() {
 }
 
 
-renderGrid();
-
-  } catch (err) {
-    app.innerHTML = `<div class="center"><strong>Couldn’t load posts 😭</strong></div>`;
-  }
-}
-
+/* ---------- BOOT ---------- */
 loadWidget();
 
 </script>
