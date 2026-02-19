@@ -84,27 +84,27 @@ body {
 /* ---------- REFRESH LOADER ---------- */
 
 .refresh-loader {
-  width: 28px;
-  height: 28px;
+  width: 24px;              /* slightly smaller */
+  height: 24px;
   opacity: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #8F8F8F;
-
-  transform: scale(0.8);
-  transition: opacity .2.2s ease, transform .2.2s ease;
+  margin-top: 6px;
+  color: #E2D6E8;
 }
 
 .refresh-loader svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;              /* smaller inner icon */
+  height: 20px;
 }
 
 .refresh-loader.active {
   opacity: 1;
-  transform: scale(1);
-  animation: spin 2.2s linear infinite; /* elegant slower rotation */
+}
+
+.refresh-loader.active svg {
+  animation: spin 2.5s linear infinite;
 }
 
 @keyframes spin {
