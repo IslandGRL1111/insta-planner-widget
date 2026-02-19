@@ -238,6 +238,9 @@ async function loadWidget() {
           : sorted;
 
       const visiblePosts = filtered.slice(0, visibleCount);
+     
+     console.log("visibleCount:", visibleCount);
+     console.log("visiblePosts:", visiblePosts.length);
 
       app.innerHTML = `
         <div class="tabs">
