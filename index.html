@@ -39,8 +39,7 @@ body {
 }
 
 .footer {
-  position: relative;
-  padding: 10px 0 120px;  /* 120px = exact flower height */
+  padding: 20px 0 40px; 
   text-align: center;
 }
 
@@ -56,6 +55,7 @@ body {
   background-position: center bottom;
 
   pointer-events: none;
+  z-index: 1;
 }
 
 /* ---------- REVEAL BUTTON ---------- */
@@ -76,7 +76,7 @@ body {
   gap: 10px;
 
   position: relative;
-  top: 16px;   /* adjust between 14px–18px for harmony */
+  top: 8px;   
 
   transition: transform .18s ease, opacity .25s ease;
   animation: softPulse 4s ease-in-out infinite;
