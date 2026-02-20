@@ -109,13 +109,41 @@ body {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
   font-style: italic;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.6;
-  letter-spacing: 0.3px;
-  color: #7A7A7A;
+  letter-spacing: 0.4px;
   text-align: center;
-  margin: 8px 0 4px;
+
+  background: linear-gradient(90deg, #8a8a8a, #b5b5b5, #8a8a8a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+
+ .end-state {
+  position: relative;
+  opacity: 0;
+  animation:
+    fadeInSoft 1.2s ease forwards,
+    floatSoft 6s ease-in-out 1.2s infinite;
+}
+ 
+ @keyframes fadeInSoft {
+  to { opacity: 1; }
+}
+
+@keyframes floatSoft {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+
+ .end-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(0,0,0,0.15);
+  margin: 0 auto 18px;
+}
+  
 
 /* ---------- TABS ---------- */
 
@@ -410,11 +438,12 @@ function showEndState() {
 
   footer.innerHTML = `
     <div class="end-state">
-      <p class="end-message">
-        You’ve reached the end ✨<br/>
-        Time to create something new 🪩
-      </p>
-    </div>
+  <div class="end-divider"></div>
+  <p class="end-message">
+    You’ve reached the end ✨<br/>
+    Time to create something new 🪩
+  </p>
+</div>
   `;
 }
 
