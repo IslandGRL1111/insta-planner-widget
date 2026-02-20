@@ -126,21 +126,21 @@ body {
   0% {
     opacity: 0;
     text-shadow:
-      0 0 0px rgba(212, 175, 55, 0);
+      0 0 0px rgba(225, 195, 120, 0);
   }
 
   55% {
     opacity: 0.8;
     text-shadow:
-      0 0 18px rgba(212, 175, 55, 0.65),
-      0 0 32px rgba(212, 175, 55, 0.35);
+      0 0 18px rgba(225, 195, 120, 0.65),
+      0 0 32px rgba(225, 195, 120, 0.35);
   }
 
   100% {
     opacity: 1;
     text-shadow:
-      0 0 10px rgba(212, 175, 55, 0.35),
-      0 0 20px rgba(212, 175, 55, 0.18);
+      0 0 10px rgba(225, 195, 120, 0.35),
+      0 0 20px rgba(225, 195, 120, 0.18);
   }
 }
 
@@ -388,10 +388,13 @@ function bindTabs() {
       tab.classList.add("active");
 
       currentView = tab.dataset.view;
-      visibleCount = 12;
 
-      moveIndicator();
+      // RESET reveal state completely
+      visibleCount = 12;
+      restoreFooter();
+
       updateGrid();
+      moveIndicator();
     });
   });
 }
@@ -409,7 +412,7 @@ function moveIndicator() {
     (activeTab.offsetWidth / 2) -
     (indicator.offsetWidth / 2);
 
-  indicator.style.transform = `translateX(${offset}px)`;
+  indicator.style.transform = ⁠ translateX(${offset}px) ⁠;
 }
 
 
@@ -418,6 +421,8 @@ function bindReveal() {
 
   const btn = document.getElementById("refreshBtn");
   const spin = document.getElementById("refreshSpin");
+
+  if (!btn || !spin) return;
 
   btn.addEventListener("click", () => {
 
@@ -439,20 +444,44 @@ function bindReveal() {
 }
 
 
+/* ---------- RESTORE FOOTER ---------- */
+function restoreFooter() {
+
+  const footer = document.querySelector(".footer");
+
+  footer.innerHTML = `
+    <button class="refresh" id="refreshBtn">
+      <span class="refresh-spin" id="refreshSpin">↻</span>
+      <span class="refresh-text">Reveal More</span>
+    </button>
+
+    <div class="footer-flowers"
+      style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
+    </div>
+  `;
+
+  bindReveal(); // reattach click event
+}
+
+
 /* ---------- END ---------- */
 function showEndState() {
+
   const footer = document.querySelector(".footer");
 
   footer.innerHTML = `
     <div class="end-state">
-  <div class="end-divider"></div>
-  <p class="end-message">
-    You’ve reached the end ✨🪩
-  </p>
-</div>
+      <div class="end-divider"></div>
+      <p class="end-message">
+        You’ve reached the end ✨🪩
+      </p>
+    </div>
+
+    <div class="footer-flowers"
+      style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
+    </div>
   `;
 }
-
 
 /* ---------- BOOT ---------- */
 loadWidget();
