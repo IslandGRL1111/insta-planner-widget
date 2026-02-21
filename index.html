@@ -225,6 +225,53 @@ body {
   background: #F4F4F4;
 }
 
+/* ---------- DATE BADGE ---------- */
+
+.date-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- POST ICONS ---------- */
+
+.post-icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.post-icon.top-right {
+  top: 6px;
+  right: 6px;
+}
+
+/* ---------- CAROUSEL COUNT ---------- */
+
+.carousel-count {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+ 
 .cell img {
   width: 100%;
   height: 100%;
@@ -397,18 +444,53 @@ function updateGrid() {
   const visiblePosts = filtered.slice(0, visibleCount);
 
   grid.innerHTML = `
-    ${visiblePosts.map(p => `
-      <div class="cell ${p.pinned ? "pinned" : ""}">
-        ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
-      </div>
-    `).join("")}
+  ${visiblePosts.map(p => {
 
-    ${Array.from({
-      length: Math.max(0, visibleCount - visiblePosts.length)
-    })
-      .map(() => `<div class="cell"></div>`)
-      .join("")}
-  `;
+    const isReel = p.type?.includes("Reel");
+    const isCarousel = p.images?.length > 1;
+    const formattedDate = p.date
+      ? new Date(p.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric"
+        })
+      : "";
+
+    return `
+      <div class="cell ${p.pinned ? "pinned" : ""}">
+
+        ${formattedDate ? `
+          <div class="date-badge">${formattedDate}</div>
+        ` : ""}
+
+        ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
+
+        ${p.pinned ? `
+          <img class="post-icon top-right"
+            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png" />
+        ` : isReel ? `
+          <img class="post-icon top-right"
+            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png" />
+        ` : isCarousel ? `
+          <img class="post-icon top-right"
+            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164182/carousel_canva_fgeyqa.png" />
+        ` : ""}
+
+        ${isCarousel && !p.pinned ? `
+          <div class="carousel-count">
+            1/${p.images.length}
+          </div>
+        ` : ""}
+
+      </div>
+    `;
+  }).join("")}
+
+  ${Array.from({
+    length: Math.max(0, visibleCount - visiblePosts.length)
+  })
+    .map(() => `<div class="cell"></div>`)
+    .join("")}
+`;
 }
 
 
