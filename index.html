@@ -231,38 +231,45 @@ body {
   object-fit: cover;
 }
 
- /* ---------- PINNED CHAMPAGNE GLOW ---------- */
+ /* ---------- PINNED CHAMPAGNE FLOW ---------- */
 
 .cell.pinned {
   position: relative;
-  box-shadow:
-    0 0 0 1px rgba(212,175,55,0.6),
-    0 0 12px rgba(225,195,120,0.6),
-    0 0 28px rgba(225,195,120,0.35);
-  animation: champagneGlow 4s ease-in-out infinite;
+  z-index: 0;
 }
 
-@keyframes champagneGlow {
-  0% {
-    box-shadow:
-      0 0 0 1px rgba(212,175,55,0.6),
-      0 0 10px rgba(225,195,120,0.4),
-      0 0 22px rgba(225,195,120,0.25);
-  }
+.cell.pinned::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  padding: 2px;
 
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(212,175,55,0.8),
-      0 0 18px rgba(255,220,140,0.7),
-      0 0 38px rgba(255,220,140,0.45);
-  }
+  background: conic-gradient(
+    from 0deg,
+    rgba(212,175,55,0.2),
+    rgba(255,230,170,0.9),
+    rgba(212,175,55,0.2),
+    rgba(255,230,170,0.9),
+    rgba(212,175,55,0.2)
+  );
 
-  100% {
-    box-shadow:
-      0 0 0 1px rgba(212,175,55,0.6),
-      0 0 10px rgba(225,195,120,0.4),
-      0 0 22px rgba(225,195,120,0.25);
-  }
+  animation: edgeFlow 8s linear infinite;
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(0.6px);
+}
+
+@keyframes edgeFlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
  
  @media (prefers-color-scheme: dark) {
