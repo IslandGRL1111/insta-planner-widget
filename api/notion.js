@@ -32,14 +32,15 @@ export default async function handler(req, res) {
     return show && isInstagram && validType && isScheduled;
   })
   .map(p => ({
-    id: p.id,
-    pinned: p.properties["Pin Post?"]?.checkbox || false,
-    title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
-    date: p.properties["Scheduled Date & Time"]?.date?.start || null,
-    platform: p.properties["Platform Name"]?.multi_select.map(x => x.name) || [],
-    type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
-    images: p.properties["Post Preview"]?.files?.map(f => f.file?.url) || [],
-  }));
+  id: p.id,
+  pinned: p.properties["Pin Post?"]?.checkbox || false,
+  title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
+  date: p.properties["Scheduled Date & Time"]?.date?.start || null,
+  platform: p.properties["Platform Name"]?.multi_select.map(x => x.name) || [],
+  type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
+  images: p.properties["Post Preview"]?.files?.map(f => f.file?.url) || [],
+  postUrl: p.properties["Post URL"]?.url || ""
+}));
 
   res.status(200).json(posts);
 }
