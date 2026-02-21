@@ -291,6 +291,10 @@ body {
   transition: opacity .25s ease;
 }
 
+ .post-image.fading {
+  opacity: 0;
+}
+ 
 .post-icon {
   position: absolute;
   top: 6px;
@@ -547,13 +551,14 @@ function bindCarousel() {
       let current = parseInt(img.dataset.current);
 current = (current + 1) % images.length;
 
-img.style.opacity = 0;
+img.classList.add("fading");
 
 setTimeout(() => {
 
   img.src = images[current];
   img.dataset.current = current;
-  img.style.opacity = 1;
+
+  img.classList.remove("fading");
 
   const counter = cell.querySelector(".carousel-count");
   if (counter) {
