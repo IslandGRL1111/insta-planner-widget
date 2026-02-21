@@ -275,14 +275,20 @@ body {
   color: #fff;
 
   font-size: 10px;
-  padding: 3px 6px;
+  font-family: -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, sans-serif;
+
+  padding: 2px 6px;
   border-radius: 6px;
+
+  backdrop-filter: blur(3px);
 }
  
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity .25s ease;
 }
 
 .post-icon {
@@ -465,7 +471,7 @@ function updateGrid() {
   const visiblePosts = filtered.slice(0, visibleCount);
 
   grid.innerHTML = `
-  ${visiblePosts.map(p => {
+  ${visiblePosts.map((p, index) => {
 
     const isReel = p.type?.includes("Reel");
     const isCarousel = p.images?.length > 1;
@@ -483,7 +489,14 @@ function updateGrid() {
           <div class="date-badge">${formattedDate}</div>
         ` : ""}
 
-        ${p.images?.[0] ? `<img class="post-image" src="${p.images[0]}" />` : ""}
+        ${p.images?.[0] ? `
+          <img 
+            class="post-image"
+            src="${p.images[0]}"
+            data-images='${JSON.stringify(p.images)}'
+            data-current="0"
+          />
+        ` : ""}
 
         ${p.pinned ? `
           <img class="post-icon top-right"
@@ -512,9 +525,49 @@ function updateGrid() {
     .map(() => `<div class="cell"></div>`)
     .join("")}
 `;
+
+  bindCarousel();  // 👈 ADD THIS LINE AT THE END
 }
 
+/* ---------- CAROUSEL TAP ---------- */
+function bindCarousel() {
 
+  const cells = document.querySelectorAll(".cell");
+
+  cells.forEach(cell => {
+
+    cell.addEventListener("click", () => {
+
+      const img = cell.querySelector(".post-image");
+      if (!img) return;
+
+      const images = JSON.parse(img.dataset.images || "[]");
+      if (images.length <= 1) return;
+
+      let current = parseInt(img.dataset.current);
+current = (current + 1) % images.length;
+
+img.style.opacity = 0;
+
+setTimeout(() => {
+
+  img.src = images[current];
+  img.dataset.current = current;
+  img.style.opacity = 1;
+
+  const counter = cell.querySelector(".carousel-count");
+  if (counter) {
+    counter.textContent = `${current + 1}/${images.length}`;
+  }
+
+}, 120);
+
+    });
+
+  });
+
+}
+ 
 /* ---------- TABS ---------- */
 function bindTabs() {
 
