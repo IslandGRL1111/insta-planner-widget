@@ -27,8 +27,11 @@ export default async function handler(req, res) {
       return res.status(403).json({ allowed: false });
     }
 
-    return res.status(200).json({ allowed: true });
-
+    return res.status(200).json({
+  allowed: true,
+  token
+});
+    
   } catch (error) {
     return res.status(500).json({ allowed: false });
   }
