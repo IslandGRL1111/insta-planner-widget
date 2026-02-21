@@ -401,7 +401,7 @@ function updateGrid() {
 
   grid.innerHTML = `
     ${visiblePosts.map(p => `
-      <div class="cell">
+      <div class="cell ${p.pinned ? "pinned" : ""}">
         ${p.images?.[0] ? `<img src="${p.images[0]}" />` : ""}
       </div>
     `).join("")}
