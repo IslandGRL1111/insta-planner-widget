@@ -249,16 +249,19 @@ body {
   pointer-events: none;
 
   background: radial-gradient(
-    circle at 0% 50%,
-    rgba(255,230,170,0.8),
+    circle,
+    rgba(255,230,170,0.85) 0%,
+    rgba(255,230,170,0.5) 20%,
     transparent 60%
   );
 
-  animation: lightOrbit 6s linear infinite;
-  opacity: 0.6;
+  background-size: 200% 200%;
+  background-repeat: no-repeat;
+
+  animation: lightOrbit 8s linear infinite;
+  opacity: 0.55;
 }
 
-/* Subtle circular movement */
 @keyframes lightOrbit {
   0%   { background-position: 0% 50%; }
   25%  { background-position: 100% 0%; }
