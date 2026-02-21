@@ -223,6 +223,8 @@ body {
   border-radius: 8px;
   overflow: hidden;
   background: #F4F4F4;
+
+  isolation: isolate;
 }
 
 /* ---------- DATE BADGE ---------- */
@@ -232,7 +234,11 @@ body {
   top: 6px;
   left: 6px;
 
-  background: rgba(0,0,0,0.35);  /* lighter */
+  z-index: 3;
+
+  will-change: transform;
+
+  background: rgba(0,0,0,0.45);  
   color: #ffffff;
 
   font-family: -apple-system, BlinkMacSystemFont,
