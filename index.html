@@ -415,13 +415,42 @@ async function loadWidget() {
     });
 
     const data = await res.json();
-    conosle.log(data);
+    console.log(data);
 
     if (data.error) {
       showAccessScreen();
       return;
     }
 
+   function showDatabaseSetupScreen(token) {
+  app.innerHTML = `
+    <div class="center">
+      <strong>Paste your Notion Database ID</strong>
+      <input id="dbInput" placeholder="Enter database ID" />
+      <button id="saveDbBtn">Connect Database</button>
+    </div>
+  `;
+
+  document.getElementById("saveDbBtn").addEventListener("click", async () => {
+    const databaseId = document.getElementById("dbInput").value.trim();
+
+    const res = await fetch("/api/save-database-id", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, databaseId })
+    });
+
+    const data = await res.json();
+
+    if (!data.saved) {
+      alert("Something went wrong. Please check your database ID.");
+      return;
+    }
+
+    loadWidget();
+  });
+}
+   
     if (data.setupRequired) {
       showDatabaseSetupScreen(storedToken);
       return;
