@@ -400,15 +400,31 @@ const app = document.getElementById("app");
 /* ---------- LOAD WIDGET ---------- */
 async function loadWidget() {
 
-  app.innerHTML = `
-    <div class="center">
-      <strong>Loading your planner… ✨</strong>
-    </div>
-  `;
+  const storedToken = localStorage.getItem("insta_widget_access");
+
+  if (!storedToken) {
+    showAccessScreen();
+    return;
+  }
 
   try {
-    const res = await fetch("/api/notion");
+    const res = await fetch("/api/notion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: storedToken })
+    });
+
     const data = await res.json();
+
+    if (data.error) {
+      showAccessScreen();
+      return;
+    }
+
+    if (data.setupRequired) {
+      showDatabaseSetupScreen(storedToken);
+      return;
+    }
 
     if (!data || !data.length) {
       app.innerHTML = `
@@ -433,7 +449,35 @@ async function loadWidget() {
   }
 }
 
+function showAccessScreen() {
+  app.innerHTML = `
+    <div class="center">
+      <input id="accessInput" placeholder="Enter access code" />
+      <button id="unlockBtn">Unlock Insta Widget</button>
+    </div>
+  `;
 
+  document.getElementById("unlockBtn").addEventListener("click", async () => {
+    const token = document.getElementById("accessInput").value.trim();
+
+    const res = await fetch("/api/check-widget-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token })
+    });
+
+    const data = await res.json();
+
+    if (!data.allowed) {
+      alert("Invalid access code. Please reach out with your purchase details.");
+      return;
+    }
+
+    localStorage.setItem("insta_widget_access", token);
+    loadWidget();
+  });
+}
+ 
 /* ---------- BUILD STATIC LAYOUT ONCE ---------- */
 function buildStaticLayout() {
 
