@@ -415,6 +415,7 @@ async function loadWidget() {
     });
 
     const data = await res.json();
+    conosle.log(data);
 
     if (data.error) {
       showAccessScreen();
