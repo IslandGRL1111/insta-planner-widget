@@ -427,16 +427,33 @@ async function loadWidget() {
       return;
     }
 
-    if (!data || !data.length) {
-      app.innerHTML = `
-        <div class="center">
-          <strong>No scheduled Instagram posts yet 🌿</strong>
-        </div>
-      `;
-      return;
-    }
+    const posts = data.posts || [];
+const layout = data.layout || [];
 
-    sorted = [...data].sort((a,b) => b.pinned - a.pinned);
+if (!posts.length) {
+  app.innerHTML = `
+    <div class="center">
+      <strong>No scheduled Instagram posts yet 🌿</strong>
+    </div>
+  `;
+  return;
+}
+
+// 🧠 Build position map
+const positionMap = {};
+layout.forEach(item => {
+  positionMap[item.post_id] = item.position;
+});
+
+// 🔁 Sort by saved layout first
+posts.sort((a, b) => {
+  const posA = positionMap[a.id] ?? 9999;
+  const posB = positionMap[b.id] ?? 9999;
+  return posA - posB;
+});
+
+// 🔥 Pin logic for pinned override
+sorted = [...posts].sort((a, b) => b.pinned - a.pinned);
 
     buildStaticLayout();
     updateGrid();
