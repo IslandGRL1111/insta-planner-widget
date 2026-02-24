@@ -59,7 +59,23 @@ export default async function handler(req, res) {
         images: p.properties["Post Preview"]?.files?.map(f => f.file?.url) || []
       }));
 
-    return res.status(200).json(posts);
+    const layoutRes = await fetch(
+  `${process.env.SUPABASE_URL}/rest/v1/feed_layout?token=eq.${token}&widget_type=eq.insta`,
+  {
+    headers: {
+      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json"
+    }
+  }
+);
+
+const layout = await layoutRes.json();
+
+    return res.status(200).json({
+  posts,
+  layout
+});
 
   } catch (error) {
     return res.status(500).json({ error: "Server error" });
