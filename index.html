@@ -544,20 +544,49 @@ function buildStaticLayout() {
     <div class="grid" id="grid"></div>
 
     <div class="footer">
-     <button class="refresh" id="refreshBtn">
-  <span class="refresh-spin" id="refreshSpin">↻</span>
-  <span class="refresh-text">Reveal More</span>
-</button>
+      <button class="refresh" id="refreshBtn">
+        <span class="refresh-spin" id="refreshSpin">↻</span>
+        <span class="refresh-text">Reveal More</span>
+      </button>
       
-   <div class="footer-flowers"
-       style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
-  </div>
-</div>
+      <div class="footer-flowers"
+        style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
+      </div>
+    </div>
   `;
 
   bindTabs();
   bindReveal();
   moveIndicator();
+
+  // 🔥 ENABLE DRAG (ONLY ONCE)
+  const grid = document.getElementById("grid");
+
+  new Sortable(grid, {
+    animation: 150,
+    onEnd: async function () {
+
+      const items = [...grid.children];
+
+      sorted = items
+        .map(item => {
+          const id = item.getAttribute("data-id");
+          return sorted.find(post => post.id === id);
+        })
+        .filter(Boolean); // remove empty slots
+
+      const storedToken = localStorage.getItem("insta_widget_access");
+
+      await fetch("/api/save-layout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: storedToken,
+          posts: sorted
+        })
+      });
+    }
+  });
 }
 
 
@@ -574,62 +603,62 @@ function updateGrid() {
   const visiblePosts = filtered.slice(0, visibleCount);
 
   grid.innerHTML = `
-  ${visiblePosts.map((p, index) => {
+    ${visiblePosts.map((p) => {
 
-    const isReel = p.type?.includes("Reel");
-    const isCarousel = p.images?.length > 1;
-    const formattedDate = p.date
-      ? new Date(p.date).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric"
-        })
-      : "";
+      const isReel = p.type?.includes("Reel");
+      const isCarousel = p.images?.length > 1;
+      const formattedDate = p.date
+        ? new Date(p.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric"
+          })
+        : "";
 
-    return `
-      <div class="cell ${p.pinned ? "pinned" : ""}">
+      return `
+        <div class="cell ${p.pinned ? "pinned" : ""}" data-id="${p.id}">
 
-        ${formattedDate ? `
-          <div class="date-badge">${formattedDate}</div>
-        ` : ""}
+          ${formattedDate ? `
+            <div class="date-badge">${formattedDate}</div>
+          ` : ""}
 
-        ${p.images?.[0] ? `
-          <img 
-            class="post-image"
-            src="${p.images[0]}"
-            data-images='${JSON.stringify(p.images)}'
-            data-current="0"
-          />
-        ` : ""}
+          ${p.images?.[0] ? `
+            <img 
+              class="post-image"
+              src="${p.images[0]}"
+              data-images='${JSON.stringify(p.images)}'
+              data-current="0"
+            />
+          ` : ""}
 
-        ${p.pinned ? `
-          <img class="post-icon top-right"
-            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png" />
-        ` : isReel ? `
-          <img class="post-icon top-right"
-            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png" />
-        ` : isCarousel ? `
-          <img class="post-icon top-right"
-            src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164182/carousel_canva_fgeyqa.png" />
-        ` : ""}
+          ${p.pinned ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png" />
+          ` : isReel ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png" />
+          ` : isCarousel ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164182/carousel_canva_fgeyqa.png" />
+          ` : ""}
 
-        ${isCarousel && !p.pinned ? `
-          <div class="carousel-count">
-            1/${p.images.length}
-          </div>
-        ` : ""}
+          ${isCarousel && !p.pinned ? `
+            <div class="carousel-count">
+              1/${p.images.length}
+            </div>
+          ` : ""}
 
-      </div>
-    `;
-  }).join("")}
+        </div>
+      `;
+    }).join("")}
 
-  ${Array.from({
-    length: Math.max(0, visibleCount - visiblePosts.length)
-  })
-    .map(() => `<div class="cell"></div>`)
-    .join("")}
-`;
+    ${Array.from({
+      length: Math.max(0, visibleCount - visiblePosts.length)
+    })
+      .map(() => `<div class="cell"></div>`)
+      .join("")}
+  `;
 
-  bindCarousel();  // 👈 ADD THIS LINE AT THE END
+  bindCarousel();
 }
 
 /* ---------- CAROUSEL TAP ---------- */
@@ -781,6 +810,8 @@ function showEndState() {
 loadWidget();
 
 </script>
+
+ <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 </body>
 </html>
