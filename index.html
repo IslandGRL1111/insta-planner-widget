@@ -604,7 +604,9 @@ function updateGrid() {
 
           ${p.files?.[0] ? (
 
-  p.type?.includes("Reel") && p.files[0].url.endsWith(".mp4")
+  p.type?.includes("Reel") &&
+  p.files[0].url.match(/\.(mp4|webm|mov)$/i)
+
     ? `
       <video
         class="post-video"
@@ -614,6 +616,7 @@ function updateGrid() {
         preload="metadata"
       ></video>
     `
+
     : `
       <img
         class="post-image"
