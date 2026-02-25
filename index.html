@@ -566,23 +566,33 @@ function buildStaticLayout() {
     animation: 150,
     onEnd: async function () {
 
-      const items = [...grid.children];
+  const items = [...grid.children];
 
-      sorted = items
-        .map(item => {
-          const id = item.getAttribute("data-id");
-          return sorted.find(post => post.id === id);
-        })
-        .filter(Boolean); // remove empty slots
+  const reorderedIds = items
+    .map(item => item.getAttribute("data-id"))
+    .filter(Boolean);
 
-      const storedToken = localStorage.getItem("insta_widget_access");
+  // Create a new sorted array safely
+  const newOrder = [...sorted];
 
-      await fetch("/api/save-layout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: storedToken,
-          posts: sorted
+  reorderedIds.forEach((id, index) => {
+    const itemIndex = newOrder.findIndex(p => p.id === id);
+    if (itemIndex !== -1) {
+      const [movedItem] = newOrder.splice(itemIndex, 1);
+      newOrder.splice(index, 0, movedItem);
+    }
+  });
+
+  sorted = newOrder;
+
+  const storedToken = localStorage.getItem("insta_widget_access");
+
+  await fetch("/api/save-layout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token: storedToken,
+      posts: sorted
         })
       });
     }
