@@ -58,16 +58,16 @@ export default async function handler(req, res) {
         type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
         files: p.properties["Post Preview"]?.files?.map(f => {
 
-  if (f.type === "file") {
+  if (f.type === "file" && f.file?.url) {
     return {
-      url: f.file?.url,
+      url: f.file.url,
       type: "file"
     };
   }
 
-  if (f.type === "external") {
+  if (f.type === "external" && f.external?.url) {
     return {
-      url: f.external?.url,
+      url: f.external.url,
       type: "external"
     };
   }
