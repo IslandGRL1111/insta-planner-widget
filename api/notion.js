@@ -57,19 +57,23 @@ export default async function handler(req, res) {
         date: p.properties["Scheduled Date & Time"]?.date?.start || null,
         type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
         files: p.properties["Post Preview"]?.files?.map(f => {
+
   if (f.type === "file") {
     return {
       url: f.file?.url,
-      kind: "file"
+      type: "file"
     };
   }
+
   if (f.type === "external") {
     return {
       url: f.external?.url,
-      kind: "external"
+      type: "external"
     };
   }
+
   return null;
+
 }).filter(Boolean) || []
       }));
 
