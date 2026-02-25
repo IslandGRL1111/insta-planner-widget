@@ -300,6 +300,12 @@ body {
  .post-image.fading {
   opacity: 0;
 }
+
+ .post-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
  
 .post-icon {
   position: absolute;
@@ -596,14 +602,28 @@ function updateGrid() {
             <div class="date-badge">${formattedDate}</div>
           ` : ""}
 
-          ${p.images?.[0] ? `
-            <img 
-              class="post-image"
-              src="${p.images[0]}"
-              data-images='${JSON.stringify(p.images)}'
-              data-current="0"
-            />
-          ` : ""}
+          ${p.files?.[0] ? (
+
+  p.type?.includes("Reel") && p.files[0].url.endsWith(".mp4")
+    ? `
+      <video
+        class="post-video"
+        src="${p.files[0].url}"
+        muted
+        playsinline
+        preload="metadata"
+      ></video>
+    `
+    : `
+      <img
+        class="post-image"
+        src="${p.files[0].url}"
+        data-images='${JSON.stringify(p.files.map(f => f.url))}'
+        data-current="0"
+      />
+    `
+
+) : ""}
 
           ${p.pinned ? `
             <img class="post-icon top-right"
@@ -634,6 +654,7 @@ function updateGrid() {
   `;
 
   bindCarousel();
+  bindVideoPlayback();
 
 // Reinitialize drag safely
 if (sortableInstance) {
@@ -733,6 +754,35 @@ setTimeout(() => {
   });
 
 }
+
+ 
+/* ---------- VIDEO PLAYBACK ---------- */
+ function bindVideoPlayback() {
+  const videos = document.querySelectorAll(".post-video");
+
+  videos.forEach(video => {
+
+    video.addEventListener("click", () => {
+
+      // Pause all other videos
+      document.querySelectorAll(".post-video").forEach(v => {
+        if (v !== video) {
+          v.pause();
+        }
+      });
+
+      if (video.paused) {
+        video.muted = false;
+        video.play();
+      } else {
+        video.pause();
+      }
+
+    });
+
+  });
+}
+
  
 /* ---------- TABS ---------- */
 function bindTabs() {
