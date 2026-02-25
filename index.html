@@ -654,14 +654,20 @@ sortableInstance = new Sortable(grid, {
 
     if (currentView === "reels") {
 
-      const reels = sorted.filter(p => p.type?.includes("Reel"));
-      const nonReels = sorted.filter(p => !p.type?.includes("Reel"));
+  const reelPosts = sorted.filter(p => p.type?.includes("Reel"));
 
-      const reorderedReels = reorderedIds
-        .map(id => reels.find(p => p.id === id))
-        .filter(Boolean);
+  const reorderedReels = reorderedIds
+    .map(id => reelPosts.find(p => p.id === id))
+    .filter(Boolean);
 
-      newSorted = [...reorderedReels, ...nonReels];
+  let reelIndex = 0;
+
+  newSorted = sorted.map(post => {
+    if (post.type?.includes("Reel")) {
+      return reorderedReels[reelIndex++];
+    }
+    return post;
+  });
 
     } else {
 
