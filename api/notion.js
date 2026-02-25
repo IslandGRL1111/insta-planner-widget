@@ -56,7 +56,21 @@ export default async function handler(req, res) {
         title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
         date: p.properties["Scheduled Date & Time"]?.date?.start || null,
         type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
-        images: p.properties["Post Preview"]?.files?.map(f => f.file?.url) || []
+        files: p.properties["Post Preview"]?.files?.map(f => {
+  if (f.type === "file") {
+    return {
+      url: f.file?.url,
+      kind: "file"
+    };
+  }
+  if (f.type === "external") {
+    return {
+      url: f.external?.url,
+      kind: "external"
+    };
+  }
+  return null;
+}).filter(Boolean) || []
       }));
 
     const layoutRes = await fetch(
