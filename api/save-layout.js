@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ saved: false });
   }
 
-  const { token, posts } = req.body;
+  const { token, widget_type, posts } = req.body;
 
   if (!token || !posts || !posts.length) {
     return res.status(400).json({ saved: false });
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   try {
     const upserts = posts.map((post, index) => ({
       token,
-      widget_type: "insta",
+      widget_type,
       post_id: post.id,
       position: index,
       updated_at: new Date().toISOString()
