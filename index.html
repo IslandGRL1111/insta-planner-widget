@@ -643,49 +643,48 @@ sortableInstance = new Sortable(grid, {
   animation: 150,
   onEnd: async function () {
 
-  const items = [...grid.children];
-  const reorderedIds = items
-    .map(item => item.getAttribute("data-id"))
-    .filter(Boolean);
+    const items = [...grid.children];
 
-  // Build new sorted array safely
-  let newSorted = [];
-
-  if (currentView === "reels") {
-
-    // Separate reels and non-reels
-    const reels = sorted.filter(p => p.type?.includes("Reel"));
-    const nonReels = sorted.filter(p => !p.type?.includes("Reel"));
-
-    // Reorder reels based on drag
-    const reorderedReels = reorderedIds
-      .map(id => reels.find(p => p.id === id))
+    const reorderedIds = items
+      .map(item => item.getAttribute("data-id"))
       .filter(Boolean);
 
-    newSorted = [...reorderedReels, ...nonReels];
+    let newSorted = [];
 
-  } else {
+    if (currentView === "reels") {
 
-    // Grid view — reorder all
-    newSorted = reorderedIds
-      .map(id => sorted.find(p => p.id === id))
-      .filter(Boolean);
+      const reels = sorted.filter(p => p.type?.includes("Reel"));
+      const nonReels = sorted.filter(p => !p.type?.includes("Reel"));
+
+      const reorderedReels = reorderedIds
+        .map(id => reels.find(p => p.id === id))
+        .filter(Boolean);
+
+      newSorted = [...reorderedReels, ...nonReels];
+
+    } else {
+
+      newSorted = reorderedIds
+        .map(id => sorted.find(p => p.id === id))
+        .filter(Boolean);
+    }
+
+    sorted = newSorted;
+
+    const storedToken = localStorage.getItem("insta_widget_access");
+
+    await fetch("/api/save-layout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: storedToken,
+        posts: sorted
+      })
+    });
+
   }
-
-  sorted = newSorted;
-
-  const storedToken = localStorage.getItem("insta_widget_access");
-
-  await fetch("/api/save-layout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      token: storedToken,
-      posts: sorted
-    })
-  });
-}
 });
+}
 
 /* ---------- CAROUSEL TAP ---------- */
 function bindCarousel() {
