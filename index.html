@@ -394,6 +394,7 @@ const WIDGET_TYPE = "insta";   // ← ADD THIS
 let currentView = "grid";
 let visibleCount = 12;
 let sorted = [];
+let sortableInstance = null;
 
 const app = document.getElementById("app");
 
@@ -562,43 +563,6 @@ function buildStaticLayout() {
   // 🔥 ENABLE DRAG (ONLY ONCE)
   const grid = document.getElementById("grid");
 
-  new Sortable(grid, {
-    animation: 150,
-    onEnd: async function () {
-
-  const items = [...grid.children];
-
-  const reorderedIds = items
-    .map(item => item.getAttribute("data-id"))
-    .filter(Boolean);
-
-  // Create a new sorted array safely
-  const newOrder = [...sorted];
-
-  reorderedIds.forEach((id, index) => {
-    const itemIndex = newOrder.findIndex(p => p.id === id);
-    if (itemIndex !== -1) {
-      const [movedItem] = newOrder.splice(itemIndex, 1);
-      newOrder.splice(index, 0, movedItem);
-    }
-  });
-
-  sorted = newOrder;
-
-  const storedToken = localStorage.getItem("insta_widget_access");
-
-  await fetch("/api/save-layout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      token: storedToken,
-      posts: sorted
-        })
-      });
-    }
-  });
-}
-
 
 /* ---------- UPDATE GRID ONLY ---------- */
 function updateGrid() {
@@ -669,7 +633,59 @@ function updateGrid() {
   `;
 
   bindCarousel();
+
+// Reinitialize drag safely
+if (sortableInstance) {
+  sortableInstance.destroy();
 }
+
+sortableInstance = new Sortable(grid, {
+  animation: 150,
+  onEnd: async function () {
+
+  const items = [...grid.children];
+  const reorderedIds = items
+    .map(item => item.getAttribute("data-id"))
+    .filter(Boolean);
+
+  // Build new sorted array safely
+  let newSorted = [];
+
+  if (currentView === "reels") {
+
+    // Separate reels and non-reels
+    const reels = sorted.filter(p => p.type?.includes("Reel"));
+    const nonReels = sorted.filter(p => !p.type?.includes("Reel"));
+
+    // Reorder reels based on drag
+    const reorderedReels = reorderedIds
+      .map(id => reels.find(p => p.id === id))
+      .filter(Boolean);
+
+    newSorted = [...reorderedReels, ...nonReels];
+
+  } else {
+
+    // Grid view — reorder all
+    newSorted = reorderedIds
+      .map(id => sorted.find(p => p.id === id))
+      .filter(Boolean);
+  }
+
+  sorted = newSorted;
+
+  const storedToken = localStorage.getItem("insta_widget_access");
+
+  await fetch("/api/save-layout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      token: storedToken,
+      posts: sorted
+    })
+  });
+}
+});
 
 /* ---------- CAROUSEL TAP ---------- */
 function bindCarousel() {
