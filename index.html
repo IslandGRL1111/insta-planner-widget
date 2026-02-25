@@ -684,9 +684,10 @@ sortableInstance = new Sortable(grid, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        token: storedToken,
-        posts: sorted
-      })
+       token: storedToken,
+       widget_type: "instagram",
+       posts: sorted
+     })
     });
 
   }
