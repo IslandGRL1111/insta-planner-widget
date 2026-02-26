@@ -614,7 +614,7 @@ function updateGrid() {
         src="${p.files[0].url}"
         muted
         playsinline
-        preload="metadata"
+        preload="auto"
       ></video>
     `
 
@@ -765,6 +765,8 @@ setTimeout(() => {
   const videos = document.querySelectorAll(".post-video");
 
   videos.forEach(video => {
+
+   video.load();
 
     video.addEventListener("click", () => {
 
