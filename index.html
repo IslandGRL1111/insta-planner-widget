@@ -577,9 +577,12 @@ function updateGrid() {
 
   const grid = document.getElementById("grid");
 
+  const isReelPost = (post) =>
+    post.type?.some(t => t.toLowerCase().trim() === "reel");
+
   const filtered =
     currentView === "reels"
-      ? sorted.filter(p => p.type?.includes("Reel"))
+      ? sorted.filter(isReelPost)
       : sorted;
 
   const visiblePosts = filtered.slice(0, visibleCount);
@@ -587,7 +590,7 @@ function updateGrid() {
   grid.innerHTML = `
     ${visiblePosts.map((p) => {
 
-      const isReel = p.type?.includes("Reel");
+      const reel = isReelPost(p);
       const isCarousel = p.files?.length > 1;
       const formattedDate = p.date
         ? new Date(p.date).toLocaleDateString("en-US", {
@@ -604,34 +607,30 @@ function updateGrid() {
           ` : ""}
 
           ${p.files?.[0] ? (
-
-  p.type?.includes("Reel")
-
-    ? `
-      <video
-        class="post-video"
-        src="${p.files[0].url}"
-        muted
-        playsinline
-        preload="metadata"
-      ></video>
-    `
-
-    : `
-      <img
-        class="post-image"
-        src="${p.files[0].url}"
-        data-images='${JSON.stringify(p.files.map(f => f.url))}'
-        data-current="0"
-      />
-    `
-
-) : ""}
+            reel
+              ? `
+                <video
+                  class="post-video"
+                  src="${p.files[0].url}"
+                  muted
+                  playsinline
+                  preload="metadata"
+                ></video>
+              `
+              : `
+                <img
+                  class="post-image"
+                  src="${p.files[0].url}"
+                  data-images='${JSON.stringify(p.files.map(f => f.url))}'
+                  data-current="0"
+                />
+              `
+          ) : ""}
 
           ${p.pinned ? `
             <img class="post-icon top-right"
               src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png" />
-          ` : isReel ? `
+          ` : reel ? `
             <img class="post-icon top-right"
               src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png" />
           ` : isCarousel ? `
@@ -659,63 +658,62 @@ function updateGrid() {
   bindCarousel();
   bindVideoPlayback();
 
-// Reinitialize drag safely
-if (sortableInstance) {
-  sortableInstance.destroy();
-}
+  if (sortableInstance) {
+    sortableInstance.destroy();
+  }
 
-sortableInstance = new Sortable(grid, {
-  animation: 150,
-  onEnd: async function () {
+  sortableInstance = new Sortable(grid, {
+    animation: 150,
+    onEnd: async function () {
 
-    const items = [...grid.children];
+      const items = [...grid.children];
+      const reorderedIds = items
+        .map(item => item.getAttribute("data-id"))
+        .filter(Boolean);
 
-    const reorderedIds = items
-      .map(item => item.getAttribute("data-id"))
-      .filter(Boolean);
+      let newSorted = [];
 
-    let newSorted = [];
+      if (currentView === "reels") {
 
-    if (currentView === "reels") {
+        const reelPosts = sorted.filter(isReelPost);
 
-  const reelPosts = sorted.filter(p => p.type?.includes("Reel"));
+        const reorderedReels = reorderedIds
+          .map(id => reelPosts.find(p => p.id === id))
+          .filter(Boolean);
 
-  const reorderedReels = reorderedIds
-    .map(id => reelPosts.find(p => p.id === id))
-    .filter(Boolean);
+        let reelIndex = 0;
 
-  let reelIndex = 0;
+        newSorted = sorted.map(post => {
+          if (isReelPost(post)) {
+            return reorderedReels[reelIndex++];
+          }
+          return post;
+        });
 
-  newSorted = sorted.map(post => {
-    if (post.type?.includes("Reel")) {
-      return reorderedReels[reelIndex++];
+      } else {
+
+        newSorted = reorderedIds
+          .map(id => sorted.find(p => p.id === id))
+          .filter(Boolean);
+      }
+
+      sorted = newSorted;
+
+      const storedToken = localStorage.getItem("insta_widget_access");
+
+      await fetch("/api/save-layout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: storedToken,
+          widget_type: "instagram",
+          posts: sorted
+        })
+      });
+
     }
-    return post;
   });
 
-    } else {
-
-      newSorted = reorderedIds
-        .map(id => sorted.find(p => p.id === id))
-        .filter(Boolean);
-    }
-
-    sorted = newSorted;
-
-    const storedToken = localStorage.getItem("insta_widget_access");
-
-    await fetch("/api/save-layout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-       token: storedToken,
-       widget_type: "instagram",
-       posts: sorted
-     })
-    });
-
-  }
-});
 }
 
 /* ---------- CAROUSEL TAP ---------- */
