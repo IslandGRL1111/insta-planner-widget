@@ -591,7 +591,9 @@ function updateGrid() {
     ${visiblePosts.map((p) => {
 
       const reel = isReelPost(p);
-      const isCarousel = p.files?.length > 1;
+      const isCarousel =
+  p.files?.length > 1 &&
+  !isReelPost(p);
       const formattedDate = p.date
         ? new Date(p.date).toLocaleDateString("en-US", {
             month: "short",
@@ -759,31 +761,32 @@ setTimeout(() => {
  
 /* ---------- VIDEO PLAYBACK ---------- */
  function bindVideoPlayback() {
-  const videos = document.querySelectorAll(".post-video");
 
-  videos.forEach(video => {
+  const reelThumbs = document.querySelectorAll(".reel-thumb");
 
-   video.load();
+  reelThumbs.forEach(img => {
 
-    video.addEventListener("click", () => {
+    img.addEventListener("click", () => {
 
-      // Pause all other videos
-      document.querySelectorAll(".post-video").forEach(v => {
-        if (v !== video) {
-          v.pause();
-        }
-      });
+      const files = JSON.parse(img.dataset.files || "[]");
+      const videoFile = files.find(f => f.url.endsWith(".mp4"));
 
-      if (video.paused) {
-        video.muted = false;
-        video.play();
-      } else {
-        video.pause();
-      }
+      if (!videoFile) return;
+
+      const video = document.createElement("video");
+      video.src = videoFile.url;
+      video.className = "post-video";
+      video.muted = false;
+      video.playsInline = true;
+      video.controls = true;
+      video.autoplay = true;
+
+      img.replaceWith(video);
 
     });
 
   });
+
 }
 
  
