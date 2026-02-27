@@ -588,7 +588,7 @@ function updateGrid() {
     ${visiblePosts.map((p) => {
 
       const isReel = p.type?.includes("Reel");
-      const isCarousel = p.images?.length > 1;
+      const isCarousel = p.files?.length > 1;
       const formattedDate = p.date
         ? new Date(p.date).toLocaleDateString("en-US", {
             month: "short",
@@ -641,7 +641,7 @@ function updateGrid() {
 
           ${isCarousel && !p.pinned ? `
             <div class="carousel-count">
-              1/${p.images.length}
+              1/${p.files.length}
             </div>
           ` : ""}
 
