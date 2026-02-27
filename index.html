@@ -608,26 +608,14 @@ function updateGrid() {
             <div class="date-badge">${formattedDate}</div>
           ` : ""}
 
-          ${p.files?.[0] ? (
-            reel
-              ? `
-                <video
-                  class="post-video"
-                  src="${p.files[0].url}"
-                  muted
-                  playsinline
-                  preload="metadata"
-                ></video>
-              `
-              : `
-                <img
-                  class="post-image"
-                  src="${p.files[0].url}"
-                  data-images='${JSON.stringify(p.files.map(f => f.url))}'
-                  data-current="0"
-                />
-              `
-          ) : ""}
+          ${p.files?.[0] ? `
+  <img
+    class="post-image ${reel ? "reel-thumb" : ""}"
+    src="${p.files[0].url}"
+    data-files='${JSON.stringify(p.files)}'
+    data-current="0"
+  />
+` : ""}
 
           ${p.pinned ? `
             <img class="post-icon top-right"
