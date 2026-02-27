@@ -756,20 +756,38 @@ setTimeout(() => {
 
     img.addEventListener("click", () => {
 
+      const cell = img.closest(".cell");
+
+      // If video already exists → revert back
+      const existingVideo = cell.querySelector("video");
+      if (existingVideo) {
+        existingVideo.pause();
+        existingVideo.remove();
+        img.style.display = "block";
+        return;
+      }
+
       const files = JSON.parse(img.dataset.files || "[]");
       const videoFile = files.find(f => f.url.endsWith(".mp4"));
-
       if (!videoFile) return;
 
       const video = document.createElement("video");
       video.src = videoFile.url;
       video.className = "post-video";
-      video.muted = false;
-      video.playsInline = true;
       video.controls = true;
+      video.playsInline = true;
       video.autoplay = true;
 
-      img.replaceWith(video);
+      // Hide thumbnail instead of deleting it
+      img.style.display = "none";
+
+      cell.appendChild(video);
+
+      // When video ends → revert automatically
+      video.addEventListener("ended", () => {
+        video.remove();
+        img.style.display = "block";
+      });
 
     });
 
