@@ -56,7 +56,8 @@ export default async function handler(req, res) {
         title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
         date: p.properties["Scheduled Date & Time"]?.date?.start || null,
         type: p.properties["Type of Post"]?.multi_select.map(x => x.name) || [],
-        files: p.properties["Post Preview"]?.files?.map(f => {
+        files: p.properties["Post Preview"]?.files || []
+}))
 
   if (f.type === "file" && f.file?.url) {
     return {
