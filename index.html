@@ -717,20 +717,25 @@ function bindCarousel() {
     if (img.classList.contains("reel-thumb")) return;
 
     const files = img.dataset.files
-  ? JSON.parse(img.dataset.files)
-  : [];
+      ? JSON.parse(img.dataset.files)
+      : [];
 
-    if (files.length <= 1) return;
+    // 🌿 Only keep real image files
+    const imageFiles = files.filter(url =>
+      /\.(jpg|jpeg|png|webp)$/i.test(url)
+    );
+
+    if (imageFiles.length <= 1) return;
 
     img.addEventListener("click", () => {
 
       let current = parseInt(img.dataset.current || "0", 10);
-      current = (current + 1) % files.length;
+      current = (current + 1) % imageFiles.length;
 
       img.style.opacity = 0;
 
       setTimeout(() => {
-        img.src = files[current];
+        img.src = imageFiles[current];
         img.dataset.current = current;
         img.style.opacity = 1;
 
@@ -738,7 +743,7 @@ function bindCarousel() {
           .querySelector(".carousel-count");
 
         if (counter) {
-          counter.textContent = `${current + 1}/${files.length}`;
+          counter.textContent = `${current + 1}/${imageFiles.length}`;
         }
 
       }, 120);
