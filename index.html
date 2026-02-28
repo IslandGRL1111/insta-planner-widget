@@ -716,9 +716,9 @@ function bindCarousel() {
     // 🚫 Skip reel thumbnails
     if (img.classList.contains("reel-thumb")) return;
 
-    const files = img.dataset.images
-      ? JSON.parse(img.dataset.images)
-      : [];
+    const files = img.dataset.files
+  ? JSON.parse(img.dataset.files)
+  : [];
 
     if (files.length <= 1) return;
 
