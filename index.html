@@ -717,29 +717,33 @@ function bindCarousel() {
 
   images.forEach(img => {
 
-    // 🚫 Skip reel thumbnails
     if (img.classList.contains("reel-thumb")) return;
 
-    const files = img.dataset.files
+    const rawFiles = img.dataset.files
       ? JSON.parse(img.dataset.files)
       : [];
 
-    // 🌿 Only keep real image files
-    const imageFiles = files.filter(url =>
-      /\.(jpg|jpeg|png|webp)$/i.test(url)
-    );
+    // Extract real URLs from Notion structure
+    const imageUrls = rawFiles
+      .map(f =>
+        f.type === "file"
+          ? f.file?.url
+          : f.external?.url
+      )
+      .filter(Boolean)
+      .filter(url => /\.(jpg|jpeg|png|webp)$/i.test(url));
 
-    if (imageFiles.length <= 1) return;
+    if (imageUrls.length <= 1) return;
 
     img.addEventListener("click", () => {
 
       let current = parseInt(img.dataset.current || "0", 10);
-      current = (current + 1) % imageFiles.length;
+      current = (current + 1) % imageUrls.length;
 
       img.style.opacity = 0;
 
       setTimeout(() => {
-        img.src = imageFiles[current];
+        img.src = imageUrls[current];
         img.dataset.current = current;
         img.style.opacity = 1;
 
@@ -747,7 +751,7 @@ function bindCarousel() {
           .querySelector(".carousel-count");
 
         if (counter) {
-          counter.textContent = `${current + 1}/${imageFiles.length}`;
+          counter.textContent = `${current + 1}/${imageUrls.length}`;
         }
 
       }, 120);
@@ -768,7 +772,7 @@ function bindCarousel() {
 
     img.addEventListener("click", (e) => {
 
-      e.stopPropagation(); // prevent bubbling issues
+      e.stopPropagation();
 
       const cell = img.closest(".cell");
       const existingVideo = cell.querySelector("video");
@@ -780,12 +784,20 @@ function bindCarousel() {
         return;
       }
 
-      const files = JSON.parse(img.dataset.files || "[]");
-      const videoFile = files.find(f => f.url.endsWith(".mp4"));
-      if (!videoFile) return;
+      const rawFiles = JSON.parse(img.dataset.files || "[]");
+
+      const videoUrl = rawFiles
+        .map(f =>
+          f.type === "file"
+            ? f.file?.url
+            : f.external?.url
+        )
+        .find(url => url && url.endsWith(".mp4"));
+
+      if (!videoUrl) return;
 
       const video = document.createElement("video");
-      video.src = videoFile.url;
+      video.src = videoUrl;
       video.className = "post-video";
       video.controls = true;
       video.playsInline = true;
