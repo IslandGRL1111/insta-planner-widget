@@ -723,7 +723,7 @@ function bindCarousel() {
       ? JSON.parse(img.dataset.files)
       : [];
 
-    // Extract real URLs from Notion structure
+    // Extract ALL non-mp4 URLs
     const imageUrls = rawFiles
       .map(f =>
         f.type === "file"
@@ -731,7 +731,7 @@ function bindCarousel() {
           : f.external?.url
       )
       .filter(Boolean)
-      .filter(url => /\.(jpg|jpeg|png|webp)$/i.test(url));
+      .filter(url => !url.toLowerCase().includes(".mp4"));
 
     if (imageUrls.length <= 1) return;
 
