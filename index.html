@@ -611,7 +611,11 @@ function updateGrid() {
           ${p.files?.[0] ? `
   <img
     class="post-image ${reel ? "reel-thumb" : ""}"
-    src="${p.files[0].url}"
+    src="${
+      p.files[0].type === "file"
+        ? p.files[0].file.url
+        : p.files[0].external.url
+    }"
     data-files='${JSON.stringify(p.files)}'
     data-current="0"
   />
