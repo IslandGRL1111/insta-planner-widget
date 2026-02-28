@@ -709,36 +709,39 @@ function updateGrid() {
 /* ---------- CAROUSEL TAP ---------- */
 function bindCarousel() {
 
-  const cells = document.querySelectorAll(".cell");
+  const images = document.querySelectorAll(".post-image");
 
-  cells.forEach(cell => {
+  images.forEach(img => {
 
-    cell.addEventListener("click", () => {
+    // 🚫 Skip reel thumbnails
+    if (img.classList.contains("reel-thumb")) return;
 
-      const img = cell.querySelector(".post-image");
-      if (!img) return;
+    const files = img.dataset.images
+      ? JSON.parse(img.dataset.images)
+      : [];
 
-      const images = JSON.parse(img.dataset.images || "[]");
-      if (images.length <= 1) return;
+    if (files.length <= 1) return;
 
-      let current = parseInt(img.dataset.current);
-current = (current + 1) % images.length;
+    img.addEventListener("click", () => {
 
-img.classList.add("fading");
+      let current = parseInt(img.dataset.current || "0", 10);
+      current = (current + 1) % files.length;
 
-setTimeout(() => {
+      img.style.opacity = 0;
 
-  img.src = images[current];
-  img.dataset.current = current;
+      setTimeout(() => {
+        img.src = files[current];
+        img.dataset.current = current;
+        img.style.opacity = 1;
 
-  img.classList.remove("fading");
+        const counter = img.closest(".cell")
+          .querySelector(".carousel-count");
 
-  const counter = cell.querySelector(".carousel-count");
-  if (counter) {
-    counter.textContent = `${current + 1}/${images.length}`;
-  }
+        if (counter) {
+          counter.textContent = `${current + 1}/${files.length}`;
+        }
 
-}, 120);
+      }, 120);
 
     });
 
@@ -754,12 +757,13 @@ setTimeout(() => {
 
   reelThumbs.forEach(img => {
 
-    img.addEventListener("click", () => {
+    img.addEventListener("click", (e) => {
+
+      e.stopPropagation(); // prevent bubbling issues
 
       const cell = img.closest(".cell");
-
-      // If video already exists → revert back
       const existingVideo = cell.querySelector("video");
+
       if (existingVideo) {
         existingVideo.pause();
         existingVideo.remove();
@@ -778,12 +782,9 @@ setTimeout(() => {
       video.playsInline = true;
       video.autoplay = true;
 
-      // Hide thumbnail instead of deleting it
       img.style.display = "none";
-
       cell.appendChild(video);
 
-      // When video ends → revert automatically
       video.addEventListener("ended", () => {
         video.remove();
         img.style.display = "block";
