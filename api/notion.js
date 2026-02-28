@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const { token } = req.body;
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ setupRequired: true });
     }
 
-    // 2️⃣ Query Notion using THAT database ID
+    // 2️⃣ Query Notion
     const notionRes = await fetch(
       `https://api.notion.com/v1/databases/${notionDatabaseId}/query`,
       {
@@ -46,59 +46,41 @@ export default async function handler(req, res) {
     const notionData = await notionRes.json();
 
     const posts = notionData.results
-  .filter(p => {
-    const show = p.properties["Show in Widget"]?.checkbox;
-    return show;
-  })
-  .map(p => ({
-    id: p.id,
-    pinned: p.properties["Pin Post?"]?.checkbox || false,
-    title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
-    date: p.properties["Scheduled Date & Time"]?.date?.start || null,
-    type: p.properties["Type of Post"]?.multi_select
-      ? p.properties["Type of Post"].multi_select.map(x => x.name)
-      : [],
-    files: p.properties["Post Preview"]?.files || []
-  }));
-
-  if (f.type === "file" && f.file?.url) {
-    return {
-      url: f.file.url,
-      type: "file"
-    };
-  }
-
-  if (f.type === "external" && f.external?.url) {
-    return {
-      url: f.external.url,
-      type: "external"
-    };
-  }
-
-  return null;
-
-}).filter(Boolean) || []
+      .filter(p => p.properties["Show in Widget"]?.checkbox)
+      .map(p => ({
+        id: p.id,
+        pinned: p.properties["Pin Post?"]?.checkbox || false,
+        title:
+          p.properties["Content Title/ Caption/ Hook"]?.title?.[0]
+            ?.plain_text || "",
+        date: p.properties["Scheduled Date & Time"]?.date?.start || null,
+        type: p.properties["Type of Post"]?.multi_select
+          ? p.properties["Type of Post"].multi_select.map(x => x.name)
+          : [],
+        files: p.properties["Post Preview"]?.files || []
       }));
 
+    // 3️⃣ Load saved layout
     const layoutRes = await fetch(
-  `${process.env.SUPABASE_URL}/rest/v1/feed_layout?token=eq.${token}&widget_type=eq.insta`,
-  {
-    headers: {
-      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-      "Content-Type": "application/json"
-    }
-  }
-);
+      `${process.env.SUPABASE_URL}/rest/v1/feed_layout?token=eq.${token}&widget_type=eq.insta`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
-const layout = await layoutRes.json();
+    const layout = await layoutRes.json();
 
     return res.status(200).json({
-  posts,
-  layout
-});
+      posts,
+      layout
+    });
 
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: "Server error" });
   }
-}
+};
