@@ -46,20 +46,20 @@ export default async function handler(req, res) {
     const notionData = await notionRes.json();
 
     const posts = notionData.results
-      .filter(p => {
-        const show = p.properties["Show in Widget"]?.checkbox;
-        return show;
-      })
-      .map(p => ({
-  id: p.id,
-  pinned: p.properties["Pin Post?"]?.checkbox || false,
-  title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
-  date: p.properties["Scheduled Date & Time"]?.date?.start || null,
-  type: p.properties["Type of Post"]?.multi_select
-    ? p.properties["Type of Post"].multi_select.map(x => x.name)
-    : [],
-  files: p.properties["Post Preview"]?.files || []
-}))
+  .filter(p => {
+    const show = p.properties["Show in Widget"]?.checkbox;
+    return show;
+  })
+  .map(p => ({
+    id: p.id,
+    pinned: p.properties["Pin Post?"]?.checkbox || false,
+    title: p.properties["Content Title/ Caption/ Hook"]?.title?.[0]?.plain_text || "",
+    date: p.properties["Scheduled Date & Time"]?.date?.start || null,
+    type: p.properties["Type of Post"]?.multi_select
+      ? p.properties["Type of Post"].multi_select.map(x => x.name)
+      : [],
+    files: p.properties["Post Preview"]?.files || []
+  }));
 
   if (f.type === "file" && f.file?.url) {
     return {
