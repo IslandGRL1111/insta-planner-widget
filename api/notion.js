@@ -1,6 +1,7 @@
 module.exports = async function handler(req, res) {
   try {
-    const { token } = req.body;
+    const { token, widget_type } = req.body;
+    const platform = widget_type || "instagram";
 
     if (!token) {
       return res.status(400).json({ error: "Missing token" });
@@ -66,7 +67,7 @@ module.exports = async function handler(req, res) {
 
     // 3️⃣ Load saved layout
     const layoutRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/feed_layout?token=eq.${token}&widget_type=eq.insta`,
+      `${process.env.SUPABASE_URL}/rest/v1/feed_layout?token=eq.${token}&widget_type=eq.${platform}`,
       {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
