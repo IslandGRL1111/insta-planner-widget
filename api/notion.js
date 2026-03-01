@@ -46,8 +46,12 @@ module.exports = async function handler(req, res) {
     const notionData = await notionRes.json();
 
     const posts = notionData.results
-      .filter(p => p.properties["Show in Widget"]?.checkbox)
-      .map(p => ({
+  .filter(p => {
+    const show = p.properties["Show in Widget"]?.checkbox;
+    const hasSchedule = p.properties["Scheduled Date & Time"]?.date?.start;
+    return show && hasSchedule;
+  })
+  .map(p => ({
         id: p.id,
         pinned: p.properties["Pin Post?"]?.checkbox || false,
         title:
