@@ -1,1 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Insta Planner Widget</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
 
+<style>
+body {
+  margin: 0;
+  font-family: system-ui;
+  background: linear-gradient(135deg,#F4EFFA,#FAF5FF);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 0;
+}
+
+.app {
+  width: 380px;
+  min-height: 620px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+ 
+  overflow: hidden;
+  position: relative;
+}
+
+.center {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer {
+  padding: 4px 0 40px; 
+  text-align: center;
+}
+
+ .footer-flowers {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  width: 100%;
+  height: 120px;
+
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---------- REVEAL BUTTON ---------- */
+
+.refresh {
+  background: #D5E7CC;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: 16px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  position: relative;
+  top: 16px;   
+
+  transition: transform .18s ease, opacity .25s ease;
+  animation: softPulse 4s ease-in-out infinite;
+}
+
+.refresh:active {
+  transform: scale(0.96);
+}
+
+ .refresh-spin {
+  font-size: 22px;   /* slightly bigger */
+  line-height: 1;
+  display: inline-block;
+  transition: transform .3s ease;
+  opacity: 0.8;      /* subtle resting state */
+}
+
+.refresh-spin.active {
+  animation: spin 1.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ---------- END MESSAGE ---------- */
+
+.end-message {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;        /* stronger presence */
+  font-style: normal;     
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: 0.3px;
+  text-align: center;
+  color: #545454;          
+  margin: 0;
+}
+
+ .end-state {
+  opacity: 0;
+  animation: fadeInGoldSettle 1.4s ease forwards;
+}
+ 
+ @keyframes fadeInGoldSettle {
+  0% {
+    opacity: 0;
+    text-shadow:
+      0 0 0px rgba(225, 195, 120, 0);
+  }
+
+  55% {
+    opacity: 0.8;
+    text-shadow:
+      0 0 18px rgba(225, 195, 120, 0.65),
+      0 0 32px rgba(225, 195, 120, 0.35);
+  }
+
+  100% {
+    opacity: 1;
+    text-shadow:
+      0 0 10px rgba(225, 195, 120, 0.35),
+      0 0 20px rgba(225, 195, 120, 0.18);
+  }
+}
+
+ .end-divider {
+  width: 36px;
+  height: 1px;
+  background: rgba(0,0,0,0.15);
+  margin: 0 auto 14px;
+}
+  
+
+/* ---------- TABS ---------- */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 90px;
+  padding: 18px 0 10px;
+  position: relative;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: transform .25s ease, opacity .25s ease;
+}
+
+.tab.active {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.tab img {
+  width: 32px;
+  display: block;
+}
+
+/* Indicator */
+
+.indicator {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  width: 60px;
+  background: #B39DDB;
+  border-radius: 3px;
+  left: 0;
+  transform: translateX(0);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+/* ---------- GRID ---------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 16px 16px 0px;
+  transition: transform .35s cubic-bezier(.4,0,.2,1),
+              opacity .35s cubic-bezier(.4,0,.2,1);
+}
+
+.grid.exiting-left {
+  transform: translateX(-40px);
+  opacity: 0;
+}
+
+.grid.exiting-right {
+  transform: translateX(40px);
+  opacity: 0;
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #F4F4F4;
+
+  isolation: isolate;
+}
+
+/* ---------- DATE BADGE ---------- */
+
+.date-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  z-index: 3;
+
+  will-change: transform;
+
+  background: rgba(0,0,0,0.45);  
+  color: #ffffff;
+
+  font-family: -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+
+  padding: 2px 6px;
+  border-radius: 5px;
+
+  backdrop-filter: blur(3px);
+}
+
+/* ---------- POST ICONS ---------- */
+
+.post-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 16px;     /* controlled size */
+  height: 16px;
+
+  object-fit: contain;
+  pointer-events: none;
+
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.45));
+}
+
+/* ---------- CAROUSEL COUNT ---------- */
+
+.carousel-count {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+
+  font-size: 10px;
+  font-family: -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Roboto, sans-serif;
+
+  padding: 2px 6px;
+  border-radius: 6px;
+
+  backdrop-filter: blur(3px);
+}
+ 
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity .25s ease;
+}
+
+ .post-image.fading {
+  opacity: 0;
+}
+
+ .post-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+ 
+.post-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 14px;
+  height: 14px;
+
+  object-fit: contain;
+  pointer-events: none;
+
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
+
+/* ---------- PINNED CHAMPAGNE GLOW (REFINED) ---------- */
+
+.cell.pinned {
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(235,215,170,0.7),
+    0 0 8px rgba(240,220,180,0.35),
+    0 0 16px rgba(240,220,180,0.2);
+  animation: champagneSoft 5.5s ease-in-out infinite;
+}
+
+@keyframes champagneSoft {
+
+  0% {
+    box-shadow:
+      0 0 0 1px rgba(235,215,170,0.65),
+      0 0 8px rgba(240,220,180,0.30),
+      0 0 16px rgba(240,220,180,0.18);
+
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(245,225,190,0.75),
+      0 0 15px rgba(245,225,190,0.40),
+      0 0 20px rgba(245,225,190,0.25);
+
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(235,215,170,0.65),
+      0 0 8px rgba(240,220,180,0.30),
+      0 0 16px rgba(240,220,180,0.18);
+
+  }
+}
+ 
+ @media (prefers-color-scheme: dark) {
+
+  body {
+    background: linear-gradient(135deg,#332F35,#332F35);
+  }
+
+  .app {
+    background: rgba(30,30,34,0.85);
+  }
+
+  .cell {
+    background: #2F2F35;
+  }
+
+  .refresh {
+    background: #D5E7CC;
+    color: #545454;
+  }
+
+  .end-message {
+    color: #CFCFCF;
+  }
+
+  .refresh-loader {
+    color: #545454;
+  }
+  
+}
+</style>
+</head>
+
+<body>
+<div class="app" id="app"></div>
+
+<script>
+
+const WIDGET_TYPE = "insta";   // ← ADD THIS
+
+let currentView = "grid";
+let visibleCount = 12;
+let sorted = [];
+let sortableInstance = null;
+
+const app = document.getElementById("app");
+
+/* ---------- LOAD WIDGET ---------- */
+async function loadWidget() {
+
+  const storedToken = localStorage.getItem("tiktok_widget_access");
+
+  if (!storedToken) {
+    showAccessScreen();
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/notion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: storedToken })
+    });
+
+    const data = await res.json();
+    console.log(data);
+    console.log(data.posts);
+
+    if (data.error) {
+      showAccessScreen();
+      return;
+    }
+
+    if (data.setupRequired) {
+      showDatabaseSetupScreen(storedToken);
+      return;
+    }
+
+    const posts = data.posts || [];
+const layout = data.layout || [];
+
+if (!posts.length) {
+  app.innerHTML = `
+    <div class="center">
+      <strong>No scheduled Instagram posts yet 🌿</strong>
+    </div>
+  `;
+  return;
+}
+
+// 🧠 Build position map
+const positionMap = {};
+layout.forEach(item => {
+  positionMap[item.post_id] = item.position;
+});
+
+// 🔁 Sort by saved layout first
+posts.sort((a, b) => {
+  const posA = positionMap[a.id] ?? 9999;
+  const posB = positionMap[b.id] ?? 9999;
+  return posA - posB;
+});
+
+// 🔥 Pin logic for pinned override
+sorted = [...posts].sort((a, b) => b.pinned - a.pinned);
+
+    buildStaticLayout();
+    updateGrid();
+
+  } catch (err) {
+    app.innerHTML = `
+      <div class="center">
+        <strong>Couldn’t load posts 😭</strong>
+      </div>
+    `;
+  }
+}
+
+function showAccessScreen() {
+  app.innerHTML = `
+    <div class="center">
+      <input id="accessInput" placeholder="Enter access code" />
+      <button id="unlockBtn">Unlock Insta Widget</button>
+    </div>
+  `;
+
+  document.getElementById("unlockBtn").addEventListener("click", async () => {
+    const token = document.getElementById("accessInput").value.trim();
+
+    const res = await fetch("/api/check-widget-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token })
+    });
+
+    const data = await res.json();
+
+    if (!data.allowed) {
+      alert("Invalid access code. Please reach out with your purchase details.");
+      return;
+    }
+
+    localStorage.setItem("tiktok_widget_access", token);
+    loadWidget();
+  });
+}
+
+function showDatabaseSetupScreen(token) {
+  app.innerHTML = `
+    <div class="center">
+      <strong>Paste your Notion Database ID</strong>
+      <input id="dbInput" placeholder="Enter database ID" />
+      <button id="saveDbBtn">Connect Database</button>
+    </div>
+  `;
+
+  document.getElementById("saveDbBtn").addEventListener("click", async () => {
+    const databaseId = document.getElementById("dbInput").value.trim();
+
+    const res = await fetch("/api/save-database-id", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, databaseId })
+    });
+
+    const data = await res.json();
+
+    if (!data.saved) {
+      alert("Something went wrong. Please check your database ID.");
+      return;
+    }
+
+    loadWidget();
+  });
+}
+ 
+/* ---------- BUILD STATIC LAYOUT ONCE ---------- */
+function buildStaticLayout() {
+
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab active" data-view="grid">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140724/grid_canva_n1grjf.png" />
+      </button>
+
+      <button class="tab" data-view="reels">
+        <img src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770140739/reels_canva_xgnq9h.png" />
+      </button>
+
+      <div class="indicator"></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="footer">
+      <button class="refresh" id="refreshBtn">
+        <span class="refresh-spin" id="refreshSpin">↻</span>
+        <span class="refresh-text">Reveal More</span>
+      </button>
+      
+      <div class="footer-flowers"
+        style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
+      </div>
+    </div>
+  `;
+
+  bindTabs();
+  bindReveal();
+  moveIndicator();
+
+  // 🔥 ENABLE DRAG (ONLY ONCE)
+  const grid = document.getElementById("grid");
+}
+
+
+/* ---------- UPDATE GRID ONLY ---------- */
+function updateGrid() {
+
+  const grid = document.getElementById("grid");
+
+  const isReelPost = (post) =>
+    post.type?.some(t => t.toLowerCase().trim() === "reel");
+
+  const filtered =
+    currentView === "reels"
+      ? sorted.filter(isReelPost)
+      : sorted;
+
+  const visiblePosts = filtered.slice(0, visibleCount);
+
+  grid.innerHTML = `
+    ${visiblePosts.map((p) => {
+
+      const reel = isReelPost(p);
+      const isCarousel =
+  p.files?.length > 1 &&
+  !isReelPost(p);
+      const formattedDate = p.date
+        ? new Date(p.date).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric"
+          })
+        : "";
+
+      return `
+        <div class="cell ${p.pinned ? "pinned" : ""}" data-id="${p.id}">
+
+          ${formattedDate ? `
+            <div class="date-badge">${formattedDate}</div>
+          ` : ""}
+
+          ${p.files?.[0] ? `
+  <img
+    class="post-image ${reel ? "reel-thumb" : ""}"
+    src="${
+      p.files[0].type === "file"
+        ? p.files[0].file.url
+        : p.files[0].external.url
+    }"
+    data-files='${JSON.stringify(p.files)}'
+    data-current="0"
+  />
+` : ""}
+
+          ${p.pinned ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770168375/pinned_canva_gbr32v.png" />
+          ` : reel ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164161/reels_canva2_ccqcof.png" />
+          ` : isCarousel ? `
+            <img class="post-icon top-right"
+              src="https://res.cloudinary.com/dh26eqeqg/image/upload/v1770164182/carousel_canva_fgeyqa.png" />
+          ` : ""}
+
+          ${isCarousel && !p.pinned ? `
+            <div class="carousel-count">
+              1/${p.files.length}
+            </div>
+          ` : ""}
+
+        </div>
+      `;
+    }).join("")}
+
+    ${Array.from({
+      length: Math.max(0, visibleCount - visiblePosts.length)
+    })
+      .map(() => `<div class="cell"></div>`)
+      .join("")}
+  `;
+
+  bindCarousel();
+  bindVideoPlayback();
+
+  if (sortableInstance) {
+    sortableInstance.destroy();
+  }
+
+  sortableInstance = new Sortable(grid, {
+    animation: 150,
+    onEnd: async function () {
+
+      const items = [...grid.children];
+      const reorderedIds = items
+        .map(item => item.getAttribute("data-id"))
+        .filter(Boolean);
+
+      let newSorted = [];
+
+      if (currentView === "reels") {
+
+        const reelPosts = sorted.filter(isReelPost);
+
+        const reorderedReels = reorderedIds
+          .map(id => reelPosts.find(p => p.id === id))
+          .filter(Boolean);
+
+        let reelIndex = 0;
+
+        newSorted = sorted.map(post => {
+          if (isReelPost(post)) {
+            return reorderedReels[reelIndex++];
+          }
+          return post;
+        });
+
+      } else {
+
+        newSorted = reorderedIds
+          .map(id => sorted.find(p => p.id === id))
+          .filter(Boolean);
+      }
+
+      sorted = newSorted;
+
+      const storedToken = localStorage.getItem("insta_widget_access");
+
+      await fetch("/api/save-layout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: storedToken,
+          widget_type: "tiktok",
+          posts: sorted
+        })
+      });
+
+    }
+  });
+
+}
+
+/* ---------- CAROUSEL TAP ---------- */
+function bindCarousel() {
+
+  const images = document.querySelectorAll(".post-image");
+
+  images.forEach(img => {
+
+    if (img.classList.contains("reel-thumb")) return;
+
+    const rawFiles = img.dataset.files
+      ? JSON.parse(img.dataset.files)
+      : [];
+
+    // Extract ALL non-mp4 URLs
+    const imageUrls = rawFiles
+      .map(f =>
+        f.type === "file"
+          ? f.file?.url
+          : f.external?.url
+      )
+      .filter(Boolean)
+      .filter(url => !url.toLowerCase().includes(".mp4"));
+
+    if (imageUrls.length <= 1) return;
+
+    img.addEventListener("click", () => {
+
+      let current = parseInt(img.dataset.current || "0", 10);
+      current = (current + 1) % imageUrls.length;
+
+      img.style.opacity = 0;
+
+      setTimeout(() => {
+        img.src = imageUrls[current];
+        img.dataset.current = current;
+        img.style.opacity = 1;
+
+        const counter = img.closest(".cell")
+          .querySelector(".carousel-count");
+
+        if (counter) {
+          counter.textContent = `${current + 1}/${imageUrls.length}`;
+        }
+
+      }, 120);
+
+    });
+
+  });
+
+}
+
+ 
+/* ---------- VIDEO PLAYBACK ---------- */
+ function bindVideoPlayback() {
+
+  const reelThumbs = document.querySelectorAll(".reel-thumb");
+
+  reelThumbs.forEach(img => {
+
+    img.addEventListener("click", (e) => {
+
+      e.stopPropagation();
+
+      const cell = img.closest(".cell");
+      const existingVideo = cell.querySelector("video");
+
+      if (existingVideo) {
+        existingVideo.pause();
+        existingVideo.remove();
+        img.style.display = "block";
+        return;
+      }
+
+      const rawFiles = JSON.parse(img.dataset.files || "[]");
+
+      const videoUrl = rawFiles
+        .map(f =>
+          f.type === "file"
+            ? f.file?.url
+            : f.external?.url
+        )
+        .find(url => url && url.endsWith(".mp4"));
+
+      if (!videoUrl) return;
+
+      const video = document.createElement("video");
+      video.src = videoUrl;
+      video.className = "post-video";
+      video.controls = true;
+      video.playsInline = true;
+      video.autoplay = true;
+
+      img.style.display = "none";
+      cell.appendChild(video);
+
+      video.addEventListener("ended", () => {
+        video.remove();
+        img.style.display = "block";
+      });
+
+    });
+
+  });
+
+}
+
+ 
+/* ---------- TABS ---------- */
+function bindTabs() {
+
+  const tabs = document.querySelectorAll(".tab");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+
+      if (currentView === tab.dataset.view) return;
+
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      currentView = tab.dataset.view;
+
+      // RESET reveal state completely
+      visibleCount = 12;
+      restoreFooter();
+
+      updateGrid();
+      moveIndicator();
+    });
+  });
+}
+
+
+/* ---------- INDICATOR ---------- */
+function moveIndicator() {
+  const activeTab = document.querySelector(".tab.active");
+  const indicator = document.querySelector(".indicator");
+
+  if (!activeTab || !indicator) return;
+
+  const offset =
+    activeTab.offsetLeft +
+    (activeTab.offsetWidth / 2) -
+    (indicator.offsetWidth / 2);
+
+  indicator.style.transform = `translateX(${offset}px)`;
+}
+
+
+/* ---------- REVEAL ---------- */
+function bindReveal() {
+
+  const btn = document.getElementById("refreshBtn");
+  const spin = document.getElementById("refreshSpin");
+
+  if (!btn || !spin) return;
+
+  btn.addEventListener("click", () => {
+
+    if (visibleCount >= 48) {
+      showEndState();
+      return;
+    }
+
+    btn.disabled = true;
+    spin.classList.add("active");
+
+    setTimeout(() => {
+      visibleCount += 12;
+      spin.classList.remove("active");
+      btn.disabled = false;
+      updateGrid();
+    }, 900);
+  });
+}
+
+
+/* ---------- RESTORE FOOTER ---------- */
+function restoreFooter() {
+
+  const footer = document.querySelector(".footer");
+
+  footer.innerHTML = `
+    <button class="refresh" id="refreshBtn">
+      <span class="refresh-spin" id="refreshSpin">↻</span>
+      <span class="refresh-text">Reveal More</span>
+    </button>
+
+    <div class="footer-flowers"
+      style="background-image:url('https://res.cloudinary.com/dh26eqeqg/image/upload/v1770260168/widget_flowers1_p5iz61.png')">
+    </div>
+  `;
+
+  bindReveal(); // reattach click event
+}
+
+
+/* ---------- END ---------- */
+function showEndState() {
+
+  const footer = document.querySelector(".footer");
+
+  footer.innerHTML = `
+    <div class="end-state">
+      <div class="end-divider"></div>
+      <p class="end-message">
+        You’ve reached the end ✨🪩
+      </p>
+    </div>
+  `;
+}
+
+/* ---------- BOOT ---------- */
+loadWidget();
+
+</script>
+
+ <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+</body>
+</html>
